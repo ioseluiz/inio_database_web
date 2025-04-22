@@ -15,9 +15,11 @@ class Proyecto_E_Resource(resources.ModelResource):
             "coordinador",
             "bldg",
             "comentarios",
-            "fiscal_year"
+            "fiscal_year",
+            "asignacion_presup",
 
         )
+        import_id_fields = ['codigo']
 
         # --- Important settings for import behaviour ---
         skip_unchanged = True # If True, rows that have not changed won't be updated

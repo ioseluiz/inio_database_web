@@ -10,6 +10,7 @@ class Proyecto_E(models.Model):
     bldg = models.CharField(max_length=20, blank=True, null=True)
     comentarios = models.TextField(blank=True, null=True)
     fiscal_year = models.IntegerField(blank=True, null=True)
+    asignacion_presup = models.FloatField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
