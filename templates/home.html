@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Title</title> <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        /* Optional: Add custom styles or overrides here if needed */
+        /* Example: Custom scrollbar styling (optional) */
+        /* ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; } */
+
+        /* Style for active link (add 'active' class via Django template logic) */
+        .sidebar-link.active {
+            background-color: #1d4ed8; /* Darker blue for active */
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .sidebar-link.active i {
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div class="flex h-screen bg-gray-100">
+
+        <button id="mobile-menu-button" class="fixed top-4 left-4 z-20 p-2 text-gray-600 bg-white rounded-md shadow-md md:hidden focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-10 w-64 bg-blue-800 text-blue-100 p-4 transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:flex md:flex-col shadow-lg">
+            <div class="flex items-center justify-between mb-6 px-2">
+                <a href="#" class="text-2xl font-bold text-white hover:text-blue-200 transition-colors"> <i class="fas fa-rocket mr-2"></i> INIO Database
+                </a>
+                <button id="close-menu-button" class="md:hidden text-blue-200 hover:text-white focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="#" class="sidebar-link flex items-center px-4 py-2.5 rounded-md hover:bg-blue-700 hover:text-white transition-colors duration-200 {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                            <i class="fas fa-tachometer-alt w-6 mr-3 text-center text-blue-300"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link flex items-center px-4 py-2.5 rounded-md hover:bg-blue-700 hover:text-white transition-colors duration-200 {% if request.resolver_match.url_name == 'project_list' %}active{% endif %}"> <i class="fas fa-folder-open w-6 mr-3 text-center text-blue-300"></i>
+                            Proyectos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link flex items-center px-4 py-2.5 rounded-md hover:bg-blue-700 hover:text-white transition-colors duration-200 {% if request.resolver_match.url_name == 'estimate_list' %}active{% endif %}"> <i class="fas fa-file-invoice-dollar w-6 mr-3 text-center text-blue-300"></i>
+                            Estimados
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link flex items-center px-4 py-2.5 rounded-md hover:bg-blue-700 hover:text-white transition-colors duration-200 {% if request.resolver_match.url_name == 'hour_log_list' %}active{% endif %}"> <i class="fas fa-clock w-6 mr-3 text-center text-blue-300"></i>
+                            Horas
+                        </a>
+                    </li>
+                    </ul>
+            </nav>
+
+            <div class="mt-auto pt-4 border-t border-blue-700">
+                <a href="#" class="flex items-center px-4 py-2.5 rounded-md text-blue-200 hover:bg-blue-700 hover:text-white transition-colors duration-200">
+                    <i class="fas fa-cog w-6 mr-3 text-center"></i>
+                    Settings
+                </a>
+                <a href="#" class="flex items-center px-4 py-2.5 rounded-md text-blue-200 hover:bg-blue-700 hover:text-white transition-colors duration-200">
+                    <i class="fas fa-sign-out-alt w-6 mr-3 text-center"></i>
+                    Logout
+                </a>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-6 overflow-y-auto">
+            <h1 class="text-3xl font-semibold text-gray-800 mb-6">Proyectos E</h1>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <p>This is where the main content for each page will be displayed.</p>
+                <p>Replace this section with your Django template blocks like <code>{% block content %}{% endblock %}</code>.</p>
+            </div>
+
+        </main>
+
+    </div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const closeMenuButton = document.getElementById('close-menu-button');
+
+        // Function to open sidebar
+        const openSidebar = () => {
+            sidebar.classList.remove('-translate-x-full');
+            sidebar.classList.add('translate-x-0');
+        };
+
+        // Function to close sidebar
+        const closeSidebar = () => {
+            sidebar.classList.remove('translate-x-0');
+            sidebar.classList.add('-translate-x-full');
+        };
+
+        // Event listener for mobile menu button (hamburger icon)
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent click from bubbling up
+                openSidebar();
+            });
+        }
+
+        // Event listener for close button inside sidebar
+        if (closeMenuButton) {
+            closeMenuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeSidebar();
+            });
+        }
+
+        // Optional: Close sidebar if clicking outside of it on mobile
+        document.addEventListener('click', (e) => {
+            // Check if sidebar is open (not fully translated) and if the click is outside the sidebar and not on the menu button
+            if (!sidebar.classList.contains('-translate-x-full') && !sidebar.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+                 // Only close if the screen is small (md breakpoint in Tailwind is 768px by default)
+                 if (window.innerWidth < 768) {
+                    closeSidebar();
+                 }
+            }
+        });
+
+    </script>
+
+</body>
+</html>
