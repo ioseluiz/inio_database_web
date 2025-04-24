@@ -4,7 +4,7 @@ from proyectos_E.models import Proyecto_E
 from estimadores.models import Estimador
 
 class Proyecto_E_Estimador(models.Model):
-    proyecto_e = models.ForeignKey(Proyecto_E, on_delete=models.CASCADE)
+    proyecto_e = models.ForeignKey(Proyecto_E, on_delete=models.CASCADE, related_name="proyectos_E_estimador_relation")
     estimador = models.ForeignKey(Estimador, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

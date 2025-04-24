@@ -26,5 +26,5 @@ admin.site.index_title = "Welcome to the Base de Datos INIO Portal" # Index page
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('estimadores.urls')),
+    path('', include('proyectos_E.urls')),
 ]
