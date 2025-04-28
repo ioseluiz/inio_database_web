@@ -26,9 +26,9 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class=" min-h-screen bg-gray-100 font-sans">
 
-    <div class="flex h-screen bg-gray-100">
+    <div class="flex min-h-screen bg-gray-100">
 
         <button id="mobile-menu-button" class="fixed top-4 left-4 z-20 p-2 text-gray-600 bg-white rounded-md shadow-md md:hidden focus:outline-none focus:ring-2 focus:ring-blue-500">
             <i class="fas fa-bars"></i>
@@ -81,8 +81,8 @@
             </div>
         </aside>
 
-        <main class="flex-1 p-6 overflow-y-auto">
-            <h1 class="text-3xl font-semibold text-gray-800 mb-6">Proyectos E</h1>
+        <main class="flex-1 p-6 ">
+            
 
             <div class="bg-white p-6 rounded-lg shadow-md">
                 {% block page_content %}
@@ -138,6 +138,15 @@
         });
 
     </script>
+
+<script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHLnKy0gpWbD3AlGszkvZAGJDOaVrMhwwSY0ocqGCEA" crossorigin="anonymous"></script>
+<script>
+    // Setup HTMX to include CSRF token for POST requests
+    document.body.addEventListener('htmx:configRequest', (event) => {
+      event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+    })
+  </script>
+
 
 </body>
 </html>
