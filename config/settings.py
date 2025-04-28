@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     "proyectos_E",
     "estimadores",
     "proyecto_E_Estimador",
+    "proyectos_C",
+    "especificadores",
     # External Apps
     "import_export",
     "django_htmx",
@@ -86,6 +88,8 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240 # higher than the count of fields
 
 
 # Password validation
