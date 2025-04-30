@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 from .models import Proyecto_E
 from proyecto_E_Estimador.models import Proyecto_E_Estimador
 
@@ -34,6 +35,41 @@ def proyectos_e_view(request):
 
     context = {'total_proyectos': total_proyectos, "page_obj": page_obj }
     return render(request, "proyectos_e.html",context)
+
+def proyectos_list_view(request):
+    """
+    View to list projects with search across codigo and title, with pagination
+    """
+    proyectos_list = Proyecto_E.objects.all() # Start with all proyectos E
+    query = request.GET.get('q') # Get the search query from URL (?q=...)
+
+    if query:
+        # Use Q objects to search across multiple fields with OR logic
+        #icontains makes the search case-insensitive
+        proyectos_list = proyectos_list.filter(
+            Q(codigo__icontains=query) | Q(title__icontains=query)
+        ).distinct() # use distinct() if your Q objects might cause duplicates
+
+    # --- Pagination ---
+    paginator = Paginator(proyectos_list, 10) # Show 10 proyectos E per page
+    page_number = request.GET.get('page')
+
+    try:
+        proyectos = paginator.page(page_number)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page
+        proyectos = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        proyectos = paginator.page(paginator.num_pages)
+
+    context = {
+        'proyectos': proyectos,
+        'query': query, # Pass the query back to the template to display in search bar
+        'page_obj': proyectos # Pass the page object for pagination controls
+    }
+
+    return render(request, '')
 
 
 # -- Detail View --
