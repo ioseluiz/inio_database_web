@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "proyecto_E_Estimador",
     "proyectos_C",
     "especificadores",
+    "proyecto_C_Especificador",
     # External Apps
     "import_export",
     "django_htmx",
