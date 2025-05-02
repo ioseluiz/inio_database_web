@@ -40,15 +40,18 @@ def proyectos_list_view(request):
     """
     View to list projects with search across codigo and title, with pagination
     """
-    proyectos_list = Proyecto_E.objects.all() # Start with all proyectos E
+    
+    proyectos_list = Proyecto_E.objects.prefetch_related('proyectos_E_estimador_relation__estimador').all() # Start with all proyectos E
     query = request.GET.get('q') # Get the search query from URL (?q=...)
-
+    print(query)
     if query:
         # Use Q objects to search across multiple fields with OR logic
         #icontains makes the search case-insensitive
         proyectos_list = proyectos_list.filter(
             Q(codigo__icontains=query) | Q(title__icontains=query)
         ).distinct() # use distinct() if your Q objects might cause duplicates
+
+    total_proyectos = len(proyectos_list)
 
     # --- Pagination ---
     paginator = Paginator(proyectos_list, 10) # Show 10 proyectos E per page
@@ -66,10 +69,11 @@ def proyectos_list_view(request):
     context = {
         'proyectos': proyectos,
         'query': query, # Pass the query back to the template to display in search bar
-        'page_obj': proyectos # Pass the page object for pagination controls
+        'page_obj': proyectos, # Pass the page object for pagination controls
+        'total_proyectos': total_proyectos
     }
 
-    return render(request, '')
+    return render(request, 'proyectos_e/proyectos_e_list.html', context)
 
 
 # -- Detail View --
