@@ -4,6 +4,7 @@
 
     <div class="mb-6"> 
         <h1 class="text-3xl font-semibold text-gray-800 mb-6">Busqueda de Proyectos E</h1>
+        <button id="addRecordBtn" type="button" class="bottom-8 right-8 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 font-bold rounded-lg shadow-md transition duration-150 ease-in-out flex items-center"><i class="fas fa-add mr-1"></i>Nuevo</button>
         <h3>Total Registros: {{total_proyectos}}</h3>
         <form method="GET" action="{% url 'proyectos_e:proyectos-e-list' %}" class="flex items-center space-x-2 bg-white p-3 rounded-lg shadow">
             <input

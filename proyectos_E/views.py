@@ -3,11 +3,13 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from .models import Proyecto_E
 from proyecto_E_Estimador.models import Proyecto_E_Estimador
+from estimadores.models import Estimador
 
 
 def proyectos_e_view(request):
     # Query all Proyectos E
     proyectos_e_items = Proyecto_E.objects.prefetch_related('proyectos_E_estimador_relation__estimador').all()
+    estimadores = Estimador.objects.filter(is_active=True)
     paginator = Paginator(proyectos_e_items, 10) # Show 25 projects per page
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -30,10 +32,8 @@ def proyectos_e_view(request):
     #     estimators_str = ",".join(estimators)
     #     info['estimadores'] = estimators_str
     #     data_proyectos.append(info)
-    
-    print('HOlaaaaaaaaaaaaaa')
 
-    context = {'total_proyectos': total_proyectos, "page_obj": page_obj }
+    context = {'total_proyectos': total_proyectos, "page_obj": page_obj, "estimadores":estimadores}
     return render(request, "proyectos_e.html",context)
 
 def proyectos_list_view(request):
