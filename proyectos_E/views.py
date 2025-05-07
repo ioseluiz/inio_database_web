@@ -168,13 +168,14 @@ def proyecto_E_detail_view(request, pk):
         context = {"proyecto": proyecto}
         return render(request, template_name, context)
     
-    elif request.method == 'DELETE':
-        # Delete an item
-        proyecto = Proyecto_E.objects.get(pk=pk)
-        proyecto.delete()
-        return redirect(reverse('proyectos_e:proyectos_e'))
-
-
+def proyecto_e_delete(request, pk):
+    print('Delete...')
+    context = {}
+    # Delete an item
+    proyecto = Proyecto_E.objects.get(pk=pk)
+    proyecto.delete()
+    return redirect(reverse('proyectos_e:proyectos_e'))
+        
 
 def item_search_view(request):
     search_query = request.GET.get('q','') # Get search query from URL parameter 'q'
