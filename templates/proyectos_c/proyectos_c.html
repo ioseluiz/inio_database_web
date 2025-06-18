@@ -1,2 +1,229 @@
 {% extends 'base.html' %}
-<h2>Proyectos CC</h2>
+{% block page_content %}
+<div class="container mx-auto px-4 py-8">
+
+    <div class="mb-6"> 
+        <h1 class="text-3xl font-semibold text-gray-800 mb-6">Proyectos CC</h1>
+        <button id="add-button" type="button" class="bottom-8 right-8 px-3 py-2 text-white bg-blue-600 hover:bg-blue-700 font-bold rounded-lg shadow-md transition duration-150 ease-in-out"><i class="fas fa-add mr-1"></i>Nuevo</button>
+        <h3>Total Registros: {{total_proyectos}}</h3>
+        <form method="GET" action="{% url 'proyectos_c:proyectos-c-list' %}" class="flex items-center space-x-2 bg-white p-3 rounded-lg shadow">
+            <input
+                type="search"
+                name="q"
+                placeholder="Buscar por codigo o titulo"
+                value="{{ query|default:''}}"
+                class="flex-grow px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+            <button
+                type="submit"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-r-md transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+            >
+                <i class="fas fa-search mr-1"></i> {# Font Awesome icon #}
+                Buscar
+            </button>
+        </form>
+    </div>
+
+    {% include "proyectos_c/proyectos_c-list-elements.html" %}
+
+    <div id="add-modal" class="modal fixed inset-0 z-50 overflow-y-auto bg-gray-600 bg-opacity-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+    
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="modal-content inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <form id="#"  method="POST">
+                    {% csrf_token %} 
+                    <div class="bg-gray-100 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                    Agregar Nuevo Estimado Conceptual
+                                </h3>
+                                <div class="mt-4 space-y-4">
+                                    <div>
+                                        <label for="codigo" class="block text-sm font-medium text-gray-700">Código</label>
+                                        <input type="text" name="codigo" id="modal-codigo" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" value="">
+                                    </div>
+                                    <div>
+                                        <label for="title" class="block text-sm font-medium text-gray-700">Titulo</label>
+                                        <input type="text" name="title" id="modal-title-input" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" value="">
+                                    </div>
+                                    <div>
+                                        <label for="fiscal-year" class="block text-sm font-medium text-gray-700">Año Fiscal</label>
+                                        <input type="text" name="fiscal_year" id="modal-title-input" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" value="">
+                                    </div>
+                                    <div>
+                                        <label for="fecha-entrada" class="block text-sm font-medium text-gray-700">Fecha de Entrada</label>
+                                        <input type="date" name="fecha_entrada" id="modal-codigo" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" value="">
+                                    </div>
+                                    <div>
+                                        <label for="fecha-salida" class="block text-sm font-medium text-gray-700">Fecha de Entrada</label>
+                                        <input type="date" name="fecha_salida" id="modal-codigo" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" value="">
+                                    </div>
+                                    <div>
+                                        <label for="seccion" class="block text-sm font-medium text-gray-700">Seccion</label>
+                                        <select name="seccion" id="modal-estimador" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                        {% for seccion in secciones %}
+                                        <option value={{seccion.name}} >{{seccion.name}}</option>
+                                        {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="coordinador" class="block text-sm font-medium text-gray-700">Coordinador</label>
+                                        <input type="text" name="coordinador" id="modal-codigo" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" value="">
+                                    </div>
+                                    <div>
+                                        <label for="estimador" class="block text-sm font-medium text-gray-700">Estimador(es)</label>
+                                        <select multiple name="estimador" id="modal-estimador" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                           {% for estimador in estimadores %}
+                                            <option value={{estimador.initials}} >{{estimador.initials}}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <p class="mt-1 text-xs text-gray-500">Hold Ctrl (or Cmd on Mac) to select multiple.</p>
+                                    </div>
+                                    <div>
+                                        <label for="comentarios" class="block text-sm font-medium text-gray-700">Comentarios</label>
+                                        <textarea name="comentarios" id="modal-comentarios" rows="3" class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"></textarea>
+                                    </div>
+                                    <div>
+                                        <label for="asignacion-presup" class="block text-sm font-medium text-gray-700">Asignacion Presupuestaria Conceptual</label>
+                                        <input type="text" name="asignacion_presup" id="modal-title-input" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" value="">
+                                    </div>
+                                    <div>
+                                        <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                                        <select id="modal-status" name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                            {% for estado in estados %}
+                                            {% if estado == "ACTIVO"%}
+                                            <option selected>{{estado}}</option>
+                                            {% else %}
+                                            <option>{{estado}}</option>
+                                            {% endif %}
+                                            {% endfor %}
+                                            
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="submit"  class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
+                            Aceptar
+                        </button>
+                        <button type="button" id="close-add-modal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addButton = document.getElementById('add-button');
+            const addModal = document.getElementById("add-modal");
+            const closeAddModalButton = document.getElementById('close-add-modal');
+            
+            const addForm = document.getElementById('add-form'); // Reference to the add form
+            const updateForm = document.getElementById('update-form'); // Reference to the update form
+            const deleteForm = document.getElementById('delete-form'); // Reference to the delete form
+    
+            // --- Modal Control Functions ---
+            function openModal(modal) {
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    document.body.classList.add('modal-open'); // Prevent background scrolling
+                }
+            }
+    
+            function closeModal(modal) {
+                if (modal) {
+                    modal.classList.add('hidden');
+                    // Only remove modal-open if no other modals are open
+                    if (!document.querySelector('.modal:not(.hidden)')) {
+                         document.body.classList.remove('modal-open');
+                    }
+                }
+            }
+    
+            // --- Event Listeners ---
+    
+            // Open Add Modal
+            if (addButton && addModal) {
+                addButton.addEventListener('click', () => {
+                    // --- Pre-populate Update Modal ---
+                    // In a real app, you'd fetch this data or have it from Django context
+                    // document.getElementById('modal-codigo').value = document.getElementById('display-codigo').textContent;
+                    // document.getElementById('modal-title-input').value = document.getElementById('display-title').textContent;
+                    // document.getElementById('modal-comentarios').value = document.getElementById('display-comentarios').textContent;
+    
+                    // Handle Status (match display text to option value/text)
+                    // const currentStatusText = document.getElementById('display-status').textContent.trim();
+                    // const statusSelect = document.getElementById('modal-status');
+                    // for (let i = 0; i < statusSelect.options.length; i++) {
+                    //     if (statusSelect.options[i].text === currentStatusText) {
+                    //         statusSelect.selectedIndex = i;
+                    //         break;
+                    //     }
+                    // }
+    
+                    // Handle Estimadores (get displayed values and select corresponding options)
+                    // const displayedEstimadores = Array.from(document.getElementById('display-estimador').children).map(span => span.textContent.trim());
+                    // const estimadorSelect = document.getElementById('modal-estimador');
+                    // for (let i = 0; i < estimadorSelect.options.length; i++) {
+                    //     if (displayedEstimadores.includes(estimadorSelect.options[i].text)) {
+                    //         estimadorSelect.options[i].selected = true;
+                    //     } else {
+                    //         estimadorSelect.options[i].selected = false; // Deselect others
+                    //     }
+                    // }
+                    // --- End Pre-population ---
+    
+                    openModal(addModal);
+                });
+            }
+    
+           
+    
+            // Close Add Modal
+            if (closeAddModalButton && addModal) {
+                closeAddModalButton.addEventListener('click', () => closeModal(addModal));
+            }
+    
+    
+            // Close modals if clicking outside the modal content
+            window.addEventListener('click', (event) => {
+                if (event.target === addModal) {
+                    closeModal(addModal);
+                }
+                
+            });
+    
+            // Handle form submissions (basic example: just close modal)
+            // In a real Django app, you would likely let the form submit normally
+            // or use AJAX (e.g., Fetch API) to submit the data without a full page reload.
+            if (addForm) {
+                addForm.addEventListener('submit', (event) => {
+                    // Prevent default form submission for this example
+                    // In a real app you might remove this preventDefault or use AJAX
+                    event.preventDefault();
+                    console.log('Update form submitted (data would be sent here).');
+                    // You might want to add AJAX logic here to send data
+                    // and then close the modal on success.
+                    closeModal(addModal);
+                    alert('Add Submitted (Example)!'); // Placeholder feedback
+                });
+            }
+    
+        });
+    </script>
+   
+
+
+
+
+{% endblock page_content %}

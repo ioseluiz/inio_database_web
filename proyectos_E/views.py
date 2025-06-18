@@ -28,11 +28,11 @@ def proyectos_e_view(request):
         estimadores = Estimador.objects.filter(is_active=True)
         secciones = Seccion.objects.filter(is_active=True)
         estados = ["ACTIVO","CANCELADO","INACTIVO","TERMINADO"]
-        paginator = Paginator(proyectos_e_items, 10) # Show 25 projects per page
+        paginator = Paginator(proyectos_e_items, 10) # Show 10 projects per page
         page_number = request.GET.get("page")
         page_obj = paginator.get_page(page_number)
         total_proyectos = len(proyectos_e_items)
-        
+         
 
         context = {'total_proyectos': total_proyectos, "page_obj": page_obj, "estimadores":estimadores, "secciones": secciones, "estados": estados}
         return render(request, "proyectos_e.html",context)
@@ -175,6 +175,9 @@ def proyecto_e_delete(request, pk):
     proyecto = Proyecto_E.objects.get(pk=pk)
     proyecto.delete()
     return redirect(reverse('proyectos_e:proyectos_e'))
+
+def proyecto_e_update(request, pk):
+    pass
         
 
 def item_search_view(request):

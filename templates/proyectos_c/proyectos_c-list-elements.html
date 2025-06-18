@@ -11,7 +11,7 @@
                 {% for x in item.proyectos_E_estimador_relation.all %}
                 <p class="text-gray-600 text-sm mb-4">Estimador: {{x.estimador.initials}}</p>
                 {% endfor %}
-                <a href="{% url 'proyectos_e:proyecto_e_detail' pk=item.pk %}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition duration-200">
+                <a href="{% url 'proyectos_c:proyecto_c_detail' pk=item.pk %}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition duration-200">
                     Ver Proyecto <i class="fas fa-arrow-right ml-1 text-xs"></i>
                 </a>
             </div>
