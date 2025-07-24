@@ -1,21 +1,17 @@
+{% load static tailwind_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock title %}</title> <script src="https://cdn.tailwindcss.com"></script>
+    <title>{% block title %}{% endblock title %}</title> 
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    {% tailwind_css %}
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
-        /* Optional: Add custom styles or overrides here if needed */
-        /* Example: Custom scrollbar styling (optional) */
-        /* ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #888; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; } */
-
-        /* Style for active link (add 'active' class via Django template logic) */
+        
         .sidebar-link.active {
             background-color: #1d4ed8; /* Darker blue for active */
             color: #ffffff;
@@ -66,9 +62,20 @@
                             Proyectos CM
                         </a>
                     </li>
+                     <li>
+                        <a href="#" class="sidebar-link flex items-center px-4 py-2.5 rounded-md hover:bg-blue-700 hover:text-white transition-colors duration-200 {% if request.resolver_match.url_name == 'estimate_list' %}active{% endif %}"> <i class="fas fa-file-invoice-dollar w-6 mr-3 text-center text-blue-300"></i>
+                            SIA
+                        </a>
+                    </li>
                     <li>
                         <a href="#" class="sidebar-link flex items-center px-4 py-2.5 rounded-md hover:bg-blue-700 hover:text-white transition-colors duration-200 {% if request.resolver_match.url_name == 'hour_log_list' %}active{% endif %}"> <i class="fas fa-clock w-6 mr-3 text-center text-blue-300"></i>
-                            Horas
+                            Licitaciones
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'contratos:contratos' %}" class="sidebar-link flex items-center px-4 py-2.5 rounded-md hover:bg-blue-700 hover:text-white transition-colors duration-200 {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                            <i class="fas fa-tachometer-alt w-6 mr-3 text-center text-blue-300"></i>
+                            Contratos
                         </a>
                     </li>
                     <li>
@@ -158,13 +165,13 @@
 
     </script>
 
-<script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHLnKy0gpWbD3AlGszkvZAGJDOaVrMhwwSY0ocqGCEA" crossorigin="anonymous"></script>
+<!-- <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHLnKy0gpWbD3AlGszkvZAGJDOaVrMhwwSY0ocqGCEA" crossorigin="anonymous"></script>
 <script>
     // Setup HTMX to include CSRF token for POST requests
     document.body.addEventListener('htmx:configRequest', (event) => {
       event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
     })
-  </script>
+  </script> -->
 
 
 </body>

@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+{% block page_content %}
+<div class="w-full flex justify-center">
+<div class="bg-white p-6 rounded-lg shadow-md w-full md:w-3/4 lg:w-1/2">
+    <h1 class="text-2xl font-semibold text-gray-800 mb-6 border-b pb-4">Proyecto CC</h1>
+
+    <div class="space-y-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-500">Código</label>
+            <p id="display-codigo" class="mt-1 text-lg text-gray-900">{{proyecto.codigo}}</p>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-500">Title</label>
+            <p id="display-title" class="mt-1 text-lg text-gray-900">{{proyecto.title}}</p>
+        </div>
+         <div>
+            <label class="block text-sm font-medium text-gray-500">Especificador(es)</label>
+            <div id="display-especificador" class="mt-1 flex flex-wrap gap-2">
+               {% for x in proyecto.proyectos_CC_especificador_relation.all %}
+                <span class="bg-green-100 text-green-800 text-sm font-medium px-2.5 py-0.5 rounded">{{x.especificador.iniciales}}</span>
+                {% endfor %}
+            </div>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-500">Estimador(es)</label>
+            <div id="display-estimador" class="mt-1 flex flex-wrap gap-2">
+                {% for x in proyecto.proyectos_CC_estimador_relation.all %}
+                <span class="bg-green-100 text-green-800 text-sm font-medium px-2.5 py-0.5 rounded">{{x.estimador.initials}}</span>
+                {% endfor %}
+            </div>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-500">Coordinador</label>
+            <p id="display-title" class="mt-1 text-lg text-gray-900">{{proyecto.coordinador}}</p>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-500">Seccion</label>
+            <p id="display-seccion" class="mt-1 text-lg text-gray-900">{{proyecto.seccion}}</p>
+        </div>
+        <div>
+    <label class="block text-sm font-medium text-gray-500">Fecha de Entrada</label>
+    <p class="mt-1 text-lg text-gray-900">
+        {% if proyecto.fecha_entrada %}
+            {{ proyecto.fecha_entrada|date:"d M Y" }}
+        {% else %}
+            <span class="text-gray-500">No especificada</span>
+        {% endif %}
+    </p>
+</div>
+        <div>
+            <label class="block text-sm font-medium text-gray-500">Comentarios</label>
+            <p id="display-comentarios" class="mt-1 text-gray-700 bg-gray-50 p-3 rounded border border-gray-200">{{proyecto.comentarios}}</p>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-500">Status</label>
+            <p id="display-status" class="mt-1 text-lg text-gray-900">
+                <span class="
+    px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full
+    {% if proyecto.get_estado_display == 'Adjudicado' %}
+        bg-green-100 text-green-800  {# Verde para Adjudicado #}
+    {% elif proyecto.get_estado_display == 'Cancelado' %}
+        bg-red-100 text-red-800      {# Rojo para Cancelado #}
+    {% elif proyecto.get_estado_display == 'Ingenieria' %}
+        bg-blue-100 text-blue-800       {# Azul para Ingenieria #}
+    {% elif proyecto.get_estado_display == 'Contratos' %}
+        bg-indigo-100 text-indigo-800
+    {% elif proyecto.get_estado_display == 'Coordinador' %}
+        bg-purple-100 text-purple-800
+    {% elif proyecto.get_estado_display == 'Desierta' %}
+        bg-yellow-100 text-yellow-800
+    {% elif proyecto.get_estado_display == 'Diferido' %}
+        bg-orange-100 text-orange-800
+    {% elif proyecto.get_estado_display == 'FMCM' %}
+        bg-pink-100 text-pink-800
+    {% elif proyecto.get_estado_display == 'Fuerzas Internas' %}
+        bg-teal-100 text-teal-800
+    {% elif proyecto.get_estado_display == 'IPIS' %}
+        bg-cyan-100 text-cyan-800
+    {% elif proyecto.get_estado_display == 'ISC' %}
+        bg-lime-100 text-lime-800
+    {% elif proyecto.get_estado_display == 'No Adjudicada' %}
+        bg-amber-100 text-amber-800
+    {% else %}
+        bg-gray-100 text-gray-800   {# Color por defecto para 'Pendiente' u otros #}
+    {% endif %}
+">
+    {{ proyecto.get_estado_display }}
+</span>
+            </p>
+        </div>
+    </div>
+
+    <div class="mt-8 pt-5 border-t border-gray-200 flex justify-end space-x-3">
+        <button id="update-button" type="button" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Actualizar
+        </button>
+        <button id="delete-button" type="button" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Eliminar
+        </button>
+    </div>
+</div>
+
+<div id="update-modal" class="modal fixed inset-0 z-50 overflow-y-auto bg-gray-600 bg-opacity-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="modal-content inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <form id="#"> 
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                Update Estimado Conceptual
+                            </h3>
+                            <div class="mt-4 space-y-4">
+                                <div>
+                                    <label for="codigo" class="block text-sm font-medium text-gray-700">Código</label>
+                                    <input type="text" name="codigo" id="modal-codigo" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" value="{{proyecto.codigo}}">
+                                </div>
+                                <div>
+                                    <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+                                    <input type="text" name="title" id="modal-title-input" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" value="New Warehouse Construction">
+                                </div>
+                                <div>
+                                    <label for="estimador" class="block text-sm font-medium text-gray-700">Estimador(es)</label>
+                                    <select multiple name="estimador" id="modal-estimador" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                        <option value="john_doe">John Doe</option>
+                                        <option value="jane_smith" selected>Jane Smith</option>
+                                        <option value="peter_jones" selected>Peter Jones</option>
+                                        <option value="susan_lee">Susan Lee</option>
+                                    </select>
+                                    <p class="mt-1 text-xs text-gray-500">Hold Ctrl (or Cmd on Mac) to select multiple.</p>
+                                </div>
+                                <div>
+                                    <label for="comentarios" class="block text-sm font-medium text-gray-700">Comentarios</label>
+                                    <textarea name="comentarios" id="modal-comentarios" rows="3" class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md">Initial estimate based on preliminary drawings. Site visit required for confirmation.</textarea>
+                                </div>
+                                <div>
+                                    <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                                    <select id="modal-status" name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                        <option>Draft</option>
+                                        <option selected>Pending Review</option>
+                                        <option>Approved</option>
+                                        <option>Rejected</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Save Changes
+                    </button>
+                    <button type="button" id="close-update-modal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="delete-modal" class="modal fixed inset-0 z-50 overflow-y-auto bg-gray-600 bg-opacity-50 hidden" aria-labelledby="delete-modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="modal-content inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+             <form id="#" action="{% url 'proyectos_e:proyecto_e_delete' pk=proyecto.pk %}">
+                {% csrf_token %}
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="delete-modal-title">
+                                Eliminar Estimado
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">
+                                    Esta seguro que desea eliminar este estimado conceptual? Esta accion no se puede revertir.
+                                </p>
+                                <p class="text-sm text-gray-700 font-medium mt-2">Item: <span id="delete-item-name">{{proyecto.codigo}}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="submit"  class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Eliminar
+                    </button>
+                    <button type="button" id="close-delete-modal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const updateButton = document.getElementById('update-button');
+        const deleteButton = document.getElementById('delete-button');
+        const updateModal = document.getElementById('update-modal');
+        const deleteModal = document.getElementById('delete-modal');
+        const closeUpdateModalButton = document.getElementById('close-update-modal');
+        const closeDeleteModalButton = document.getElementById('close-delete-modal');
+        const updateForm = document.getElementById('update-form'); // Reference to the update form
+        const deleteForm = document.getElementById('delete-form'); // Reference to the delete form
+
+        // --- Modal Control Functions ---
+        function openModal(modal) {
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.classList.add('modal-open'); // Prevent background scrolling
+            }
+        }
+
+        function closeModal(modal) {
+            if (modal) {
+                modal.classList.add('hidden');
+                // Only remove modal-open if no other modals are open
+                if (!document.querySelector('.modal:not(.hidden)')) {
+                     document.body.classList.remove('modal-open');
+                }
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // Open Update Modal
+        if (updateButton && updateModal) {
+            updateButton.addEventListener('click', () => {
+                // --- Pre-populate Update Modal ---
+                // In a real app, you'd fetch this data or have it from Django context
+                document.getElementById('modal-codigo').value = document.getElementById('display-codigo').textContent;
+                document.getElementById('modal-title-input').value = document.getElementById('display-title').textContent;
+                document.getElementById('modal-comentarios').value = document.getElementById('display-comentarios').textContent;
+
+                // Handle Status (match display text to option value/text)
+                const currentStatusText = document.getElementById('display-status').textContent.trim();
+                const statusSelect = document.getElementById('modal-status');
+                for (let i = 0; i < statusSelect.options.length; i++) {
+                    if (statusSelect.options[i].text === currentStatusText) {
+                        statusSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+
+                // Handle Estimadores (get displayed values and select corresponding options)
+                const displayedEstimadores = Array.from(document.getElementById('display-estimador').children).map(span => span.textContent.trim());
+                const estimadorSelect = document.getElementById('modal-estimador');
+                for (let i = 0; i < estimadorSelect.options.length; i++) {
+                    if (displayedEstimadores.includes(estimadorSelect.options[i].text)) {
+                        estimadorSelect.options[i].selected = true;
+                    } else {
+                        estimadorSelect.options[i].selected = false; // Deselect others
+                    }
+                }
+                // --- End Pre-population ---
+
+                openModal(updateModal);
+            });
+        }
+
+        // Open Delete Modal
+        if (deleteButton && deleteModal) {
+            deleteButton.addEventListener('click', () => {
+                 // Optionally update the item name in the delete confirmation
+                 const codigo = document.getElementById('display-codigo').textContent;
+                 const title = document.getElementById('display-title').textContent;
+                 document.getElementById('delete-item-name').textContent = `${codigo} - ${title}`;
+                openModal(deleteModal);
+            });
+        }
+
+        // Close Update Modal
+        if (closeUpdateModalButton && updateModal) {
+            closeUpdateModalButton.addEventListener('click', () => closeModal(updateModal));
+        }
+
+        // Close Delete Modal
+        if (closeDeleteModalButton && deleteModal) {
+            closeDeleteModalButton.addEventListener('click', () => closeModal(deleteModal));
+        }
+
+        // Close modals if clicking outside the modal content
+        window.addEventListener('click', (event) => {
+            if (event.target === updateModal) {
+                closeModal(updateModal);
+            }
+            if (event.target === deleteModal) {
+                closeModal(deleteModal);
+            }
+        });
+
+        // Handle form submissions (basic example: just close modal)
+        // In a real Django app, you would likely let the form submit normally
+        // or use AJAX (e.g., Fetch API) to submit the data without a full page reload.
+        if (updateForm) {
+            updateForm.addEventListener('submit', (event) => {
+                // Prevent default form submission for this example
+                // In a real app you might remove this preventDefault or use AJAX
+                event.preventDefault();
+                console.log('Update form submitted (data would be sent here).');
+                // You might want to add AJAX logic here to send data
+                // and then close the modal on success.
+                closeModal(updateModal);
+                alert('Update Submitted (Example)!'); // Placeholder feedback
+            });
+        }
+
+         if (deleteForm) {
+            deleteForm.addEventListener('submit', (event) => {
+                // Prevent default form submission for this example
+                event.preventDefault();
+                console.log('Delete form submitted (item would be deleted here).');
+                // Add AJAX logic here if needed
+                closeModal(deleteModal);
+                alert('Delete Submitted (Example)!'); // Placeholder feedback
+                // Potentially redirect or update the UI after deletion
+            });
+        }
+
+    });
+</script>
+{% endblock %}

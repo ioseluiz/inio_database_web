@@ -1,0 +1,120 @@
+{% load humanize %}
+
+{% for item in page_obj %}
+
+<card>
+    <div class="bg-white m-3 shadow-lg overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+            
+            <div class="p-5">
+                <h3 class="text-xl font-semibold text-blue-900 mb-2">Contrato: {{item.numero_contrato}}</h3>
+                <p class="text-gray-600 text-sm mb-4">Rubro: {{item.rubro}}</p>
+
+                <p class="text-gray-600 text-sm mb-4">Descripcion: {{item.description}}</p>
+                <p class="text-gray-600 text-sm mb-4">Licitacion: {{item.numero_licitacion}}</p>
+                <p class="text-gray-600 text-sm mb-4">Fecha Adjudicacion: {{item.fecha_adjudicacion}}</p>
+                {% if item.monto_contrato_original %}
+                    <p class="text-gray-600 text-sm mb-4">Monto Original: ${{item.monto_contrato_original |floatformat:2|intcomma }}</p>
+                {% endif %}
+                <p class="text-gray-600 text-sm mb-4">Empresa: {{item.vendor_name}}</p>
+                <p class="text-gray-600 text-sm mb-4">Estado: 
+                    <span class="
+                                font-medium text-sm px-3 py-1 rounded-full
+                                {% if item.status == 'OPEN' %}
+                                bg-green-100 text-green-700
+                                {% elif item.status == 'CLOSED' %}
+                                bg-red-100 text-red-700
+                                {% else %}
+                                bg-gray-100 text-gray-700
+                                {% endif %}
+                            ">  {{ item.status}}
+  </span>
+                    
+                  </p>
+
+
+                
+                <!-- <a href="{% url 'contratos:contratos_detail' pk=item.pk %}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition duration-200">
+                    Ver Contrato <i class="fas fa-arrow-right ml-1 text-xs"></i>
+                </a> -->
+            </div>
+        </div>
+</card>
+
+
+{% endfor %}
+
+
+<div class="pagination mt-8 mb-4">
+    {# Use flexbox for layout and center items. Add spacing between elements. #}
+    <nav class="flex justify-center items-center space-x-2" aria-label="Pagination">
+
+        {# Previous/First Links #}
+        {% if page_obj.has_previous %}
+            {# First Page Link #}
+            <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+               class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 transition duration-150 ease-in-out">
+                <span class="sr-only">First</span> {# Screen reader text #}
+                &laquo; {# first #}
+            </a>
+            {# Previous Page Link #}
+            <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+               class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 transition duration-150 ease-in-out">
+                {# Use Chevron icon for previous, more common than text #}
+                <span class="sr-only">Previous</span>
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                {# Or use text: previous #}
+            </a>
+        {% else %}
+            {# Disabled First Link #}
+            <span class="px-3 py-2 leading-tight text-gray-400 bg-white border border-gray-300 rounded-lg cursor-not-allowed">
+                <span class="sr-only">First</span>
+                &laquo; {# first #}
+            </span>
+             {# Disabled Previous Link #}
+            <span class="px-3 py-2 leading-tight text-gray-400 bg-white border border-gray-300 rounded-lg cursor-not-allowed">
+                 <span class="sr-only">Previous</span>
+                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+            </span>
+        {% endif %}
+
+        {# Current Page Info - Can optionally add page number links here too #}
+        <span class="current px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hidden sm:inline-block">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+         {# Mobile page indicator #}
+         <span class="current px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg sm:hidden">
+            {{ page_obj.number }}/{{ page_obj.paginator.num_pages }}
+        </span>
+
+
+        {# Next/Last Links #}
+        {% if page_obj.has_next %}
+            {# Next Page Link #}
+            <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+               class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 transition duration-150 ease-in-out">
+                <span class="sr-only">Next</span>
+                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                {# Or use text: next #}
+            </a>
+             {# Last Page Link #}
+            <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+               class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 transition duration-150 ease-in-out">
+                <span class="sr-only">Last</span>
+                &raquo; {# last #}
+            </a>
+        {% else %}
+            {# Disabled Next Link #}
+            <span class="px-3 py-2 leading-tight text-gray-400 bg-white border border-gray-300 rounded-lg cursor-not-allowed">
+                 <span class="sr-only">Next</span>
+                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+            </span>
+             {# Disabled Last Link #}
+             <span class="px-3 py-2 leading-tight text-gray-400 bg-white border border-gray-300 rounded-lg cursor-not-allowed">
+                 <span class="sr-only">Last</span>
+                 &raquo; {# last #}
+             </span>
+        {% endif %}
+
+    </nav>
+</div>
+    

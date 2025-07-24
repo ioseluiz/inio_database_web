@@ -1,0 +1,2 @@
+tenant_id = e9d094df-e4a7-405f-aeaf-13ec2fb28cef
+primary_domain = pancanal.onmicrosoft.com
