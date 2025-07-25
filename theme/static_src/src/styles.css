@@ -8,3 +8,9 @@
   * the scope of this path.
   */
 @source "../../../**/*.{html,py,js}";
+
+
+@theme {
+  --color-primary-brand: #004a93;
+  --color-primary-accent: #C1323E;
+}

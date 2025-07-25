@@ -1,55 +1,53 @@
-
-
 {% for item in page_obj %}
 
 <card>
-    <div class="block bg-white rounded-lg border border-gray-200 hover:border-primary-brand shadow-lg hover:scale-[1.02] transition-all duration-200 ease-in-out">
+    <div class="bg-white m-3 shadow-lg overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
             
             <div class="p-5">
-                <h3 class="text-xl font-semibold text-blue-900 mb-2">{{item.codigo}}</h3>
-                <p class="text-gray-600 text-sm mb-4">{{item.title}}</p>
+                <h3 class="text-xl font-semibold text-blue-900 mb-2">{{item.CodProyecto}}</h3>
+                <!-- <p class="text-gray-600 text-sm mb-4">{{item.title}}</p>
                 {% for x in item.proyectos_CC_estimador_relation.all %}
                 <p class="text-gray-600 text-sm mb-4">Estimador: {{x.estimador.initials}}</p>
                 {% endfor %}
 
                 {% for rel in item.proyectos_CC_especificador_relation.all %}
-                <p class="text-gray-500 text-sm mb-4">Especificador: {{rel.especificador.iniciales}}</p>
+                <p class="text-gray-500 text-sm mb-4">Especificador: {{rel.especificador.iniciales}}</p> -->
                 {% endfor %}
-                          <p class="text-gray-600 text-sm mb-4">Estado: 
-                    <span class="
-    px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full
-    {% if item.get_estado_display == 'Adjudicado' %}
-        bg-green-100 text-green-800  {# Verde para Adjudicado #}
-    {% elif item.get_estado_display == 'Cancelado' %}
-        bg-red-100 text-red-800      {# Rojo para Cancelado #}
-    {% elif item.get_estado_display == 'Ingenieria' %}
-        bg-blue-100 text-blue-800       {# Azul para Ingenieria #}
-    {% elif item.get_estado_display == 'Contratos' %}
-        bg-indigo-100 text-indigo-800
-    {% elif item.get_estado_display == 'Coordinador' %}
-        bg-purple-100 text-purple-800
-    {% elif item.get_estado_display == 'Desierta' %}
-        bg-yellow-100 text-yellow-800
-    {% elif item.get_estado_display == 'Diferido' %}
-        bg-orange-100 text-orange-800
-    {% elif item.get_estado_display == 'FMCM' %}
-        bg-pink-100 text-pink-800
-    {% elif item.get_estado_display == 'Fuerzas Internas' %}
-        bg-teal-100 text-teal-800
-    {% elif item.get_estado_display == 'IPIS' %}
-        bg-cyan-100 text-cyan-800
-    {% elif item.get_estado_display == 'ISC' %}
-        bg-lime-100 text-lime-800
-    {% elif item.get_estado_display == 'No Adjudicada' %}
-        bg-amber-100 text-amber-800
-    {% else %}
-        bg-gray-100 text-gray-800   {# Color por defecto para 'Pendiente' u otros #}
-    {% endif %}
-">
-    {{ item.get_estado_display }}
-</span>
-                </p>
-                <a href="{% url 'proyectos_c:proyecto_c_detail' pk=item.pk %}" class="inline-block bg-primary-brand hover:bg-primary-accent text-white text-sm font-medium py-2 px-4 rounded-lg transition duration-200">
+                            <!-- <p class="text-gray-600 text-sm mb-4">Estado: 
+                        <span class="
+        px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full
+        {% if item.get_estado_display == 'Adjudicado' %}
+            bg-green-100 text-green-800  {# Verde para Adjudicado #}
+        {% elif item.get_estado_display == 'Cancelado' %}
+            bg-red-100 text-red-800      {# Rojo para Cancelado #}
+        {% elif item.get_estado_display == 'Ingenieria' %}
+            bg-blue-100 text-blue-800       {# Azul para Ingenieria #}
+        {% elif item.get_estado_display == 'Contratos' %}
+            bg-indigo-100 text-indigo-800
+        {% elif item.get_estado_display == 'Coordinador' %}
+            bg-purple-100 text-purple-800
+        {% elif item.get_estado_display == 'Desierta' %}
+            bg-yellow-100 text-yellow-800
+        {% elif item.get_estado_display == 'Diferido' %}
+            bg-orange-100 text-orange-800
+        {% elif item.get_estado_display == 'FMCM' %}
+            bg-pink-100 text-pink-800
+        {% elif item.get_estado_display == 'Fuerzas Internas' %}
+            bg-teal-100 text-teal-800
+        {% elif item.get_estado_display == 'IPIS' %}
+            bg-cyan-100 text-cyan-800
+        {% elif item.get_estado_display == 'ISC' %}
+            bg-lime-100 text-lime-800
+        {% elif item.get_estado_display == 'No Adjudicada' %}
+            bg-amber-100 text-amber-800
+        {% else %}
+            bg-gray-100 text-gray-800   {# Color por defecto para 'Pendiente' u otros #}
+        {% endif %}
+    ">
+        {{ item.get_estado_display }}
+    </span>
+                    </p> -->
+                <a href="{% url 'proyectos_c:proyecto_c_detail' pk=item.pk %}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition duration-200">
                     Ver Proyecto <i class="fas fa-arrow-right ml-1 text-xs"></i>
                 </a>
             </div>
@@ -133,4 +131,3 @@
 
     </nav>
 </div>
-    
