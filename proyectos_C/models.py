@@ -1,4 +1,5 @@
 from django.db import models
+from licitaciones.models import Licitacion
 
 STATUS_PROYECTOS = (
     (1,"Adjudicado"),
@@ -62,3 +63,11 @@ class Proyecto_CC(models.Model):
 
     def __str__(self):
         return f"{self.codigo}"
+    
+
+class Proyecto_CC_Licitacion(models.Model):
+    proyecto_cc = models.ForeignKey(Proyecto_CC, on_delete=models.CASCADE)
+    licitacion = models.ForeignKey(Licitacion, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Proyecto CC: {self.proyecto_cc.codigo} - Licitacion: {self.licitacion.rfq}"
