@@ -66,8 +66,8 @@ class Proyecto_CC(models.Model):
         return f"{self.codigo}"
     
 class Proyecto_CC_Estimado_Conceptual(models.Model):
-    proyecto_cc = models.ForeignKey(Proyecto_CC, on_delete=models.CASCADE)
-    estimado_conceptual = models.ForeignKey(Proyecto_E, on_delete=models.CASCADE)
+    proyecto_cc = models.ForeignKey(Proyecto_CC, on_delete=models.CASCADE, related_name="proyectos_CC_estimado_conceptual_cc")
+    estimado_conceptual = models.ForeignKey(Proyecto_E, on_delete=models.CASCADE, related_name="proyectos_CC_estimado_conceptual_e")
 
     def __str__(self):
         return f"Proyecto CC: {self.proyecto_cc.codigo} - Estimado Conceptual: {self.estimado_conceptual.codigo}"
