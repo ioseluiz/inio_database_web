@@ -1,5 +1,7 @@
 from django.db import models
 
+from proyectos_C.models import Proyecto_CC
+
 
 class SIA(models.Model):
     CodProyecto = models.CharField(max_length=25)
@@ -23,8 +25,13 @@ class SIA(models.Model):
         return f"SIA No.: {self.CodProyecto}"
     
 
-class SIA_Proyecto_CC(models.Model):
-    cod_proyecto = models.ForeignKey(SIA, on_delete=models.CASCADE)
+
+    # class SIA_Proyecto_CC(models.Model):
+    #     cod_proyecto = models.ForeignKey(SIA, on_delete=models.CASCADE, related_name="sia_proyecto_cc_relation")
+    #     proyecto_cc = models.ForeignKey(Proyecto_CC, on_delete=models.CASCADE, related_name="proyecto_cc_sia_relation")
+
+    #     def __str__(self):
+    #         return f"Proyecto CC: {self.proyecto_cc} - SIA: {self.cod_proyecto}"
     
     
 

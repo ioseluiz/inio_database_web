@@ -1,9 +1,9 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
 
-from .resources import Proyecto_CC_Resource, Proyecto_CC_Estimado_Conceptal_Resource
+from .resources import Proyecto_CC_Resource, Proyecto_CC_Estimado_Conceptal_Resource, Proyecto_CC_Licitacion_Resource
 
-from .models import Proyecto_CC, Proyecto_CC_Estimado_Conceptual
+from .models import Proyecto_CC, Proyecto_CC_Estimado_Conceptual, Proyecto_CC_Licitacion
 
 @admin.register(Proyecto_CC)
 class Proyecto_CCAdmin(ImportExportModelAdmin):
@@ -17,3 +17,11 @@ class Proyecto_CC_Estimado_Conceptual_Admin(ImportExportModelAdmin):
     list_display = ('proyecto_cc', 'estimado_conceptual')
     search_fields = ('proyecto_cc__codigo', 'estimado_conceptual__codigo')
     autocomplete_fields = ['proyecto_cc', 'estimado_conceptual']
+
+@admin.register(Proyecto_CC_Licitacion)
+class Proyecto_CC_Licitacion_Admin(ImportExportModelAdmin):
+    resource_class = Proyecto_CC_Licitacion_Resource
+    list_display = ('proyecto_cc', 'licitacion')
+    search_fields = ('proyecto_cc__codigo', 'licitacion__rfq')
+    autocomplete_fields = ['proyecto_cc', 'licitacion']
+

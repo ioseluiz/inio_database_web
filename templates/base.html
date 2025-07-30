@@ -66,7 +66,7 @@
                     </li>
                      
                     <li>
-                        <a href="#" class="sidebar-link flex items-center px-4 py-2.5 rounded-md hover:bg-primary-accent hover:text-white transition-colors duration-200 {% if request.resolver_match.url_name == 'hour_log_list' %}active{% endif %}"> <i class="fas fa-file-contract w-6 mr-3 text-center text-white"></i>
+                        <a href="{% url 'licitaciones:licitaciones' %}" class="sidebar-link flex items-center px-4 py-2.5 rounded-md hover:bg-primary-accent hover:text-white transition-colors duration-200 {% if request.resolver_match.url_name == 'hour_log_list' %}active{% endif %}"> <i class="fas fa-file-contract w-6 mr-3 text-center text-white"></i>
                             Licitaciones
                         </a>
                     </li>

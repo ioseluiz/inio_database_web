@@ -33,8 +33,10 @@
             <label class="block text-sm font-medium text-gray-500">Estimado Conceptual:</label>
             <div id="display-connceptual" class="mt-1 flex flex-wrap gap-2">
                 {% for rel in proyecto.proyectos_CC_estimado_conceptual_cc.all %}
+                <a href="{% url 'proyectos_e:proyecto_e_detail' pk=rel.estimado_conceptual.pk %}">
                 <span class="bg-green-100 text-green-800 text-sm font-medium px-2.5 py-0.5 rounded">
                     {{ rel.estimado_conceptual.codigo }}</span>
+                    </a>
                     {% endfor %}
             </div>
         </div>
