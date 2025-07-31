@@ -158,6 +158,8 @@ class Propuesta(models.Model):
     )
     bid_proponente_id = models.CharField(
         max_length=255,
+        null=True,
+        blank=True,
         verbose_name="ID Proponente de Oferta"
     )
 
