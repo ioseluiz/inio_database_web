@@ -6,7 +6,7 @@ from .models import Licitacion, CategoryLicitacion, Propuesta, Enmienda
 # admin.site.register(Licitacion)
 admin.site.register(CategoryLicitacion)
 
-admin.site.register(Enmienda)
+
 
 @admin.register(Licitacion)
 class LicitacionAdmin(admin.ModelAdmin):
@@ -20,6 +20,14 @@ class LicitacionAdmin(admin.ModelAdmin):
     # También puedes agregar otros campos para mejorar la visualización en el admin.
     list_display = ('rfq', 'gral_desc', 'publication_date') # Ejemplo: ajusta los campos según tu modelo
     # list_filter = ('estado',) # Ejemplo
+
+@admin.register(Enmienda)
+class EnmiendaAdmin(admin.ModelAdmin):
+    """
+    Registra el modelo Enmienda en el sitio de administracion.
+    """
+    search_fields = ['licitacion__rfq']
+    list_display = ('enmienda_id','licitacion', 'fecha_enmienda','enmienda_desc')
 
 @admin.register(Propuesta)
 class PropuestaAdmin(admin.ModelAdmin):

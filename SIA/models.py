@@ -3,7 +3,7 @@ from django.db import models
 from proyectos_C.models import Proyecto_CC
 
 
-class SIA(models.Model):
+class tblProyectos(models.Model):
     CodProyecto = models.CharField(max_length=25)
     NomProyecto = models.TextField(blank=True, null=True)
     CodCuenta = models.PositiveIntegerField(blank=True, null=True)
@@ -23,6 +23,8 @@ class SIA(models.Model):
 
     def __str__(self):
         return f"SIA No.: {self.CodProyecto}"
+    
+# class tblTransacciones(models.Model)
     
 
 

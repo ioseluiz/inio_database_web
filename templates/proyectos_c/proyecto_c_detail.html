@@ -41,6 +41,18 @@
             </div>
         </div>
         <div>
+            <label class="block text-sm font-medium text-gray-500">Licitación RFQ:</label>
+            <div id="display-licitacion" class="mt-1 flex flex-wrap gap-2">
+                {% for licitacion_rel in proyecto.proyecto_cc_licitacion_set.all %}
+                <a href="{% url 'licitaciones:licitaciones_detail' pk=licitacion_rel.licitacion.pk %}">
+                <span class="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded">
+                    {{ licitacion_rel.licitacion.rfq }}
+                </span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        <div>
             <label class="block text-sm font-medium text-gray-500">Coordinador</label>
             <p id="display-title" class="mt-1 text-lg text-gray-900">{{proyecto.coordinador}}</p>
         </div>

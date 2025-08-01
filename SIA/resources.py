@@ -1,11 +1,11 @@
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 
-from .models import SIA
+from .models import tblProyectos
 
-class SIA_Resource(resources.ModelResource):
+class tblProyectos_Resource(resources.ModelResource):
     class Meta:
-        model = SIA
+        model = tblProyectos
         fields = (
             "CodProyecto",
             "NomProyecto",

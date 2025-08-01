@@ -150,38 +150,44 @@ class Command(BaseCommand):
                         enmienda_val_str = row.get('ENMIENDA')
                         fecha_enmienda_str = row.get('FECHA_ENMIENDA')
 
-                        # Solo intentar procesar si los campos clave de la enmienda existen.
-                        if enmienda_val_str and fecha_enmienda_str:
+                        # Solo intentar procesar si el ID de la enmienda no está vacío o es 'nan'.
+                        if enmienda_val_str and str(enmienda_val_str).lower() != 'nan':
                             try:
-                                # Intentar parsear los datos clave de la enmienda primero.
                                 enmienda_id_parsed = self._parse_enmienda_id(enmienda_val_str, row_num)
                                 fecha_enmienda_parsed = self._parse_date(fecha_enmienda_str, row_num, 'FECHA_ENMIENDA')
 
-                                # >>> CAMBIO CLAVE:
-                                # Solo proceder a crear el objeto si el ID y la fecha son válidos.
-                                # Ya no usamos 'continue', lo que permite que el script siga hacia la Propuesta.
-                                if enmienda_id_parsed is not None and fecha_enmienda_parsed is not None:
+                                if enmienda_id_parsed is not None:
+                                    # Prepara los datos que pueden ser actualizados.
                                     enmienda_data = {
-                                        'licitacion': licitacion_obj,
-                                        'enmienda_id': enmienda_id_parsed,
                                         'enmienda_desc': row.get('ENMIENDA_DESC') or None,
                                         'fecha_enmienda': fecha_enmienda_parsed,
                                     }
                                     
                                     enmienda_obj, created_enmienda = Enmienda.objects.get_or_create(
                                         licitacion=licitacion_obj,
-                                        enmienda_id=enmienda_data['enmienda_id'],
+                                        enmienda_id=enmienda_id_parsed,
                                         defaults=enmienda_data
                                     )
                                     
                                     if created_enmienda:
-                                        # El contador 'created_count' ya no se incrementa aquí porque se movió
-                                        # a una sección anterior en tu código original. Puedes ajustarlo si lo necesitas.
-                                        self.stdout.write(self.style.SUCCESS(f'    Enmienda {enmienda_id_parsed} creada para licitación "{licitacion_obj.rfq}".'))
-                                    # (Lógica de actualización de enmienda aquí...)
+                                        created_count += 1
+                                        self.stdout.write(self.style.SUCCESS(f'    Fila {row_num}: Enmienda {enmienda_id_parsed} creada para licitación "{licitacion_obj.rfq}".'))
+                                    else:
+                                        # --- ¡LÓGICA DE ACTUALIZACIÓN AÑADIDA! ---
+                                        # Si la enmienda ya existe, verificamos si hay cambios.
+                                        update_needed = False
+                                        for field, value in enmienda_data.items():
+                                            if getattr(enmienda_obj, field) != value:
+                                                setattr(enmienda_obj, field, value)
+                                                update_needed = True
+                                        
+                                        if update_needed:
+                                            enmienda_obj.save()
+                                            updated_count += 1
+                                            self.stdout.write(self.style.WARNING(f'    Fila {row_num}: Enmienda {enmienda_id_parsed} actualizada para licitación "{licitacion_obj.rfq}".'))
 
                             except (ValueError, TypeError) as e:
-                                self.stdout.write(self.style.ERROR(f'    Fila {row_num}: Error inesperado al procesar Enmienda: {e}.'))
+                                self.stdout.write(self.style.ERROR(f'    Fila {row_num}: Error al procesar Enmienda: {e}.'))
                                 error_count += 1
 
                         # -- 4. Procesar Propuesta --
