@@ -1,10 +1,7 @@
 from django.db import models
 
-from proyectos_C.models import Proyecto_CC
-
-
 class tblProyectos(models.Model):
-    CodProyecto = models.CharField(max_length=25)
+    CodProyecto = models.CharField(max_length=25, primary_key=True)
     NomProyecto = models.TextField(blank=True, null=True)
     CodCuenta = models.PositiveIntegerField(blank=True, null=True)
     CodRamo = models.CharField(max_length=10,blank=True, null=True)
@@ -21,19 +18,27 @@ class tblProyectos(models.Model):
     IPCoordinador = models.CharField(max_length=50,blank=True, null=True)
     Abierto = models.IntegerField(blank=True, null=True)
 
+    HorasTotales = models.FloatField(default=0.0, null=True, blank=True, help_text="Suma total de horas (Regular, Extra, Comp) registradas para este proyecto.")
+
     def __str__(self):
         return f"SIA No.: {self.CodProyecto}"
     
-# class tblTransacciones(models.Model)
+class tblTransacciones(models.Model):
+    Fecha = models.DateTimeField()
+    IP = models.CharField(max_length=15)
+    CodProyecto = models.ForeignKey(tblProyectos, to_field='CodProyecto', db_column='CodProyecto',on_delete=models.CASCADE, related_name='transacciones')
+    HoraRegular = models.FloatField(blank=True, null=True)
+    HoraExtra = models.FloatField(blank=True, null=True)
+    HoraComp = models.FloatField(blank=True, null=True)
+    CodRamo = models.CharField(max_length=10, blank=True, null=True)
+
+    def __str__(self):
+        return f"Carga de tiempo, SIA: {self.CodProyecto.CodProyecto} por Fecha: {self.Fecha}"
     
-
-
-    # class SIA_Proyecto_CC(models.Model):
-    #     cod_proyecto = models.ForeignKey(SIA, on_delete=models.CASCADE, related_name="sia_proyecto_cc_relation")
-    #     proyecto_cc = models.ForeignKey(Proyecto_CC, on_delete=models.CASCADE, related_name="proyecto_cc_sia_relation")
-
-    #     def __str__(self):
-    #         return f"Proyecto CC: {self.proyecto_cc} - SIA: {self.cod_proyecto}"
+    class Meta:
+        # Define una clave única compuesta para evitar duplicados si es necesario
+        unique_together = ('Fecha', 'IP', 'CodProyecto')
+        verbose_name_plural = "tblTransacciones"
     
     
 

@@ -16,6 +16,7 @@ class Contrato(models.Model):
     rubro = models.CharField(max_length=15,blank=True, null=True)
     tipo_licitacion = models.CharField(max_length=20,blank=True, null=True)
     numero_licitacion = models.CharField(max_length=50,blank=True, null=True)
+    licitacion = models.ForeignKey(Licitacion, on_delete=models.SET_NULL, null=True, blank=True, related_name='contratos', verbose_name='Licitacion')
     numero_propuesta_ganadora = models.CharField(max_length=50,blank=True, null=True)
     status = models.CharField(max_length=25, choices=STATUS_CONTRATO, db_default='OPEN')
     fecha_cierre = models.DateTimeField(blank=True, null=True)

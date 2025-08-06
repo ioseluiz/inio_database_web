@@ -30,6 +30,8 @@ class Licitacion(models.Model):
         ("Cancelacion Del Acto", "Cancelacion Del Acto"), 
         ("Enmendada", "Enmendada"),
         ("Evaluacion", "Evaluacion"),
+        ("En Preparacion", "En Preparacion"),
+        ("Abiertas", "Abiertas")
     ]
 
     rfq = models.CharField(

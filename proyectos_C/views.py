@@ -43,7 +43,8 @@ def proyectos_c_detail_view(request, pk):
             'proyectos_CC_estimador_relation__estimador',
             'proyectos_CC_especificador_relation__especificador',
             'proyectos_CC_estimado_conceptual_cc__estimado_conceptual',
-            'proyecto_cc_licitacion_set__licitacion'
+            'proyecto_cc_licitacion_set__licitacion',
+            'proyecto_cc_sia_set__sia',
         ).get(pk=pk)
         template_name = "proyectos_c/proyecto_c_detail.html"
 
@@ -97,7 +98,10 @@ def proyectos_list_view(request):
 # -- Detail View --
 def proyecto_C_detail_view(request, pk):
     if request.method == "GET":
-        proyecto = Proyecto_CC.objects.prefetch_related('proyectos_C_estimador_relation__estimador', 'proyectos_CC_especificador_relation__especificador').get(pk=pk)
+        proyecto = Proyecto_CC.objects.prefetch_related
+        ('proyectos_C_estimador_relation__estimador',
+          'proyectos_CC_especificador_relation__especificador',
+          ).get(pk=pk)
         template_name = "proyecto_c_detail.html"
 
         context = {"proyecto": proyecto}

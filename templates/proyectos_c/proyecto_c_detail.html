@@ -52,24 +52,156 @@
                 {% endfor %}
             </div>
         </div>
+
+        {% for licitacion_rel in proyecto.proyecto_cc_licitacion_set.all %}
+        {% if licitacion_rel.licitacion.contratos.exists %}
+                            <div class="ml-4 mt-2">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Contratos:</label>
+                                <div class="space-y-1">
+                                    {% for contrato in licitacion_rel.licitacion.contratos.all %}
+                                        <div class="flex items-center justify-between bg-white p-2 rounded border border-gray-200">
+                                            <div class="flex items-center space-x-2">
+                                                <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded">
+                                                    {{ contrato.numero_contrato }}
+                                                </span>
+                                              
+                                            </div>
+                                            </div>
+                                            {% endfor %}
+                                            </div>
+                            </div>
+        {% endif%}
+        {% endfor %}
+
         <div>
+        <label class="block text-sm font-medium text-gray-500">SIA:</label>
+        <div class="mt-2 overflow-x-auto">
+            <table class="min-w-full leading-normal shadow-md rounded-lg">
+                <thead>
+                    <tr>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Código Proyecto
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Nombre Proyecto
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Horas Cargadas
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Horas Presupuestadas
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sia_rel in proyecto.proyecto_cc_sia_set.all %}
+                    <tr>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">
+                                {{ sia_rel.sia.CodProyecto }}
+                            </p>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">
+                                {{ sia_rel.sia.NomProyecto }}
+                            </p>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">
+                                {{sia_rel.sia.HorasTotales |floatformat:2}}
+                            </p>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">
+                                {# Aquí irán las Horas Presupuestadas cuando estén disponibles #}
+                            </p>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center" colspan="4">
+                            <p class="text-gray-500 whitespace-no-wrap">No hay proyectos SIA asociados.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="pt-4">
+        <label class="block text-sm font-medium text-gray-500 mb-2">Fechas Clave</label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <p class="text-xs font-semibold text-gray-600 uppercase">Fecha de Entrada</p>
+                <p class="text-lg font-medium text-gray-900 mt-1">
+                    {% if proyecto.fecha_entrada %}
+                        {{ proyecto.fecha_entrada|date:"d M Y" }}
+                    {% else %}
+                        <span class="text-gray-400 text-base">No especificada</span>
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <p class="text-xs font-semibold text-gray-600 uppercase">Envío a FIO</p>
+                <p class="text-lg font-medium text-gray-900 mt-1">
+                    {% if proyecto.fecha_envio_FIO %}
+                        {{ proyecto.fecha_envio_FIO|date:"d M Y" }}
+                    {% else %}
+                        <span class="text-gray-400 text-base">No especificada</span>
+                    {% endif %}
+                </p>
+            </div>
+
+            {% for licitacion_rel in proyecto.proyecto_cc_licitacion_set.all %}
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p class="text-xs font-semibold text-gray-600 uppercase">Pub. Licitación ({{ licitacion_rel.licitacion.rfq }})</p>
+                    <p class="text-lg font-medium text-gray-900 mt-1">
+                        {% if licitacion_rel.licitacion.publication_date %}
+                           {{ licitacion_rel.licitacion.publication_date|date:"d M Y" }}
+                        {% else %}
+                            <span class="text-gray-400 text-base">No especificada</span>
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p class="text-xs font-semibold text-gray-600 uppercase">Cierre Licitación ({{ licitacion_rel.licitacion.rfq }})</p>
+                    <p class="text-lg font-medium text-gray-900 mt-1">
+                         {% if licitacion_rel.licitacion.closed_date %}
+                           {{ licitacion_rel.licitacion.closed_date|date:"d M Y" }}
+                        {% else %}
+                            <span class="text-gray-400 text-base">No especificada</span>
+                        {% endif %}
+                    </p>
+                </div>
+
+                {% for contrato in licitacion_rel.licitacion.contratos.all %}
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <p class="text-xs font-semibold text-gray-600 uppercase">Adjudicación ({{ contrato.numero_contrato }})</p>
+                         <p class="text-lg font-medium text-gray-900 mt-1">
+                            {% if contrato.fecha_adjudicacion %}
+                               {{ contrato.fecha_adjudicacion|date:"d M Y" }}
+                            {% else %}
+                                <span class="text-gray-400 text-base">No especificada</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+    <div>
             <label class="block text-sm font-medium text-gray-500">Coordinador</label>
-            <p id="display-title" class="mt-1 text-lg text-gray-900">{{proyecto.coordinador}}</p>
+            <p id="display-coordinador" class="mt-1 text-lg text-gray-900">{{proyecto.coordinador}}</p>
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-500">Seccion</label>
             <p id="display-seccion" class="mt-1 text-lg text-gray-900">{{proyecto.seccion}}</p>
         </div>
-        <div>
-    <label class="block text-sm font-medium text-gray-500">Fecha de Entrada</label>
-    <p class="mt-1 text-lg text-gray-900">
-        {% if proyecto.fecha_entrada %}
-            {{ proyecto.fecha_entrada|date:"d M Y" }}
-        {% else %}
-            <span class="text-gray-500">No especificada</span>
-        {% endif %}
-    </p>
-</div>
+        
         <div>
             <label class="block text-sm font-medium text-gray-500">Comentarios</label>
             <p id="display-comentarios" class="mt-1 text-gray-700 bg-gray-50 p-3 rounded border border-gray-200">{{proyecto.comentarios}}</p>
@@ -80,11 +212,11 @@
                 <span class="
     px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full
     {% if proyecto.get_estado_display == 'Adjudicado' %}
-        bg-green-100 text-green-800  {# Verde para Adjudicado #}
+        bg-green-100 text-green-800
     {% elif proyecto.get_estado_display == 'Cancelado' %}
-        bg-red-100 text-red-800      {# Rojo para Cancelado #}
+        bg-red-100 text-red-800
     {% elif proyecto.get_estado_display == 'Ingenieria' %}
-        bg-blue-100 text-blue-800       {# Azul para Ingenieria #}
+        bg-blue-100 text-blue-800
     {% elif proyecto.get_estado_display == 'Contratos' %}
         bg-indigo-100 text-indigo-800
     {% elif proyecto.get_estado_display == 'Coordinador' %}
@@ -104,7 +236,7 @@
     {% elif proyecto.get_estado_display == 'No Adjudicada' %}
         bg-amber-100 text-amber-800
     {% else %}
-        bg-gray-100 text-gray-800   {# Color por defecto para 'Pendiente' u otros #}
+        bg-gray-100 text-gray-800
     {% endif %}
 ">
     {{ proyecto.get_estado_display }}
@@ -265,12 +397,10 @@
         if (updateButton && updateModal) {
             updateButton.addEventListener('click', () => {
                 // --- Pre-populate Update Modal ---
-                // In a real app, you'd fetch this data or have it from Django context
-                document.getElementById('modal-codigo').value = document.getElementById('display-codigo').textContent;
-                document.getElementById('modal-title-input').value = document.getElementById('display-title').textContent;
-                document.getElementById('modal-comentarios').value = document.getElementById('display-comentarios').textContent;
+                document.getElementById('modal-codigo').value = document.getElementById('display-codigo').textContent.trim();
+                document.getElementById('modal-title-input').value = document.getElementById('display-title').textContent.trim();
+                document.getElementById('modal-comentarios').value = document.getElementById('display-comentarios').textContent.trim();
 
-                // Handle Status (match display text to option value/text)
                 const currentStatusText = document.getElementById('display-status').textContent.trim();
                 const statusSelect = document.getElementById('modal-status');
                 for (let i = 0; i < statusSelect.options.length; i++) {
@@ -280,18 +410,12 @@
                     }
                 }
 
-                // Handle Estimadores (get displayed values and select corresponding options)
                 const displayedEstimadores = Array.from(document.getElementById('display-estimador').children).map(span => span.textContent.trim());
                 const estimadorSelect = document.getElementById('modal-estimador');
                 for (let i = 0; i < estimadorSelect.options.length; i++) {
-                    if (displayedEstimadores.includes(estimadorSelect.options[i].text)) {
-                        estimadorSelect.options[i].selected = true;
-                    } else {
-                        estimadorSelect.options[i].selected = false; // Deselect others
-                    }
+                    estimadorSelect.options[i].selected = displayedEstimadores.includes(estimadorSelect.options[i].text);
                 }
-                // --- End Pre-population ---
-
+                
                 openModal(updateModal);
             });
         }
@@ -299,9 +423,8 @@
         // Open Delete Modal
         if (deleteButton && deleteModal) {
             deleteButton.addEventListener('click', () => {
-                 // Optionally update the item name in the delete confirmation
-                 const codigo = document.getElementById('display-codigo').textContent;
-                 const title = document.getElementById('display-title').textContent;
+                 const codigo = document.getElementById('display-codigo').textContent.trim();
+                 const title = document.getElementById('display-title').textContent.trim();
                  document.getElementById('delete-item-name').textContent = `${codigo} - ${title}`;
                 openModal(deleteModal);
             });
@@ -327,31 +450,21 @@
             }
         });
 
-        // Handle form submissions (basic example: just close modal)
-        // In a real Django app, you would likely let the form submit normally
-        // or use AJAX (e.g., Fetch API) to submit the data without a full page reload.
         if (updateForm) {
             updateForm.addEventListener('submit', (event) => {
-                // Prevent default form submission for this example
-                // In a real app you might remove this preventDefault or use AJAX
                 event.preventDefault();
-                console.log('Update form submitted (data would be sent here).');
-                // You might want to add AJAX logic here to send data
-                // and then close the modal on success.
+                console.log('Update form submitted.');
                 closeModal(updateModal);
-                alert('Update Submitted (Example)!'); // Placeholder feedback
+                alert('Update Submitted (Example)!');
             });
         }
 
          if (deleteForm) {
             deleteForm.addEventListener('submit', (event) => {
-                // Prevent default form submission for this example
                 event.preventDefault();
-                console.log('Delete form submitted (item would be deleted here).');
-                // Add AJAX logic here if needed
+                console.log('Delete form submitted.');
                 closeModal(deleteModal);
-                alert('Delete Submitted (Example)!'); // Placeholder feedback
-                // Potentially redirect or update the UI after deletion
+                alert('Delete Submitted (Example)!');
             });
         }
 

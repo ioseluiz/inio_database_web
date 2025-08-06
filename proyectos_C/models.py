@@ -1,6 +1,8 @@
 from django.db import models
 from licitaciones.models import Licitacion
 from proyectos_E.models import Proyecto_E
+from SIA.models import tblProyectos
+
 
 STATUS_PROYECTOS = (
     (1,"Adjudicado"),
@@ -79,3 +81,10 @@ class Proyecto_CC_Licitacion(models.Model):
 
     def __str__(self):
         return f"Proyecto CC: {self.proyecto_cc.codigo} - Licitacion: {self.licitacion.rfq}"
+    
+class Proyecto_CC_SIA(models.Model):
+    proyecto_cc = models.ForeignKey(Proyecto_CC, on_delete=models.CASCADE)
+    sia = models.ForeignKey(tblProyectos, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Proyecto CC: {self.proyecto_cc.codigo} - SIA: {self.sia.CodProyecto}"
