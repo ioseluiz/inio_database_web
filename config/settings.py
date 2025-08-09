@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "contratos",
     "licitaciones",
     "SIA",
+    "master_projects",
     # External Apps
     "import_export",
     "django_htmx",

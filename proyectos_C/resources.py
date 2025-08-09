@@ -53,13 +53,6 @@ class Proyecto_CC_Estimado_Conceptal_Resource(resources.ModelResource):
         report_skipped = True
 
 
-from import_export import resources, fields
-from import_export.widgets import ForeignKeyWidget
-
-from proyectos_C.models import Proyecto_CC
-from .models import Licitacion
-
-
 class Proyecto_CC_Licitacion_Resource(resources.ModelResource):
 
     proyecto_cc = fields.Field(

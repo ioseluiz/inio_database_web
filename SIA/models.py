@@ -19,6 +19,8 @@ class tblProyectos(models.Model):
     Abierto = models.IntegerField(blank=True, null=True)
 
     HorasTotales = models.FloatField(default=0.0, null=True, blank=True, help_text="Suma total de horas (Regular, Extra, Comp) registradas para este proyecto.")
+    horas_estimador = models.FloatField(default=0.0, null=True, blank=True)
+    horas_especificador = models.FloatField(default=0.0, null=True, blank=True)
 
     def __str__(self):
         return f"SIA No.: {self.CodProyecto}"

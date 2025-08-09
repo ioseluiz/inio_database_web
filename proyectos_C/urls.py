@@ -9,6 +9,7 @@ urlpatterns = [
     path('proyectos-c/<int:pk>', views.proyectos_c_detail_view, name='proyecto_c_detail'),
     path('proyectos-c-search/', views.proyectos_list_view, name='proyectos-c-list'),
     path('proyectos-c/<int:pk>/delete',views.proyecto_c_delete, name='proyecto_c_delete'),
+    path('api/gantt-data/<int:pk>/', views.proyecto_gantt_data, name='proyecto_gantt_data'),
 ]
 
 # urlpatterns = [

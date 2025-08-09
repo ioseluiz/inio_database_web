@@ -19,3 +19,44 @@ class Proyecto_E(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+
+
+class HorasApoyo(models.Model):
+    proyecto_e = models.ForeignKey(Proyecto_E, on_delete=models.CASCADE, related_name='horas_de_apoyo')
+    revision = models.CharField(max_length=10, null=True, blank=True)
+    hr_diseno_inic_ar = models.FloatField(null=True, blank=True)
+    hr_diseno_inic_ic = models.FloatField(null=True, blank=True)
+    hr_diseno_inic_ie = models.FloatField(null=True, blank=True)
+    hr_diseno_inic_ih = models.FloatField(null=True, blank=True)
+    hr_diseno_inie_dm = models.FloatField(null=True, blank=True)
+    hr_diseno_inie_ee = models.FloatField(null=True, blank=True)
+    hr_diseno_inie_sm = models.FloatField(null=True, blank=True)
+    hr_diseno_inig_ig = models.FloatField(null=True, blank=True)
+    hr_diseno_inig_pe = models.FloatField(null=True, blank=True)
+    hr_diseno_inio_ce = models.FloatField(null=True, blank=True)
+    hr_diseno_inio_es = models.FloatField(null=True, blank=True)
+    hr_diseno_init = models.FloatField(null=True, blank=True)
+    
+    hr_apoyo_inic_ar = models.FloatField(null=True, blank=True)
+    hr_apoyo_inic_ic = models.FloatField(null=True, blank=True)
+    hr_apoyo_inic_ie = models.FloatField(null=True, blank=True)
+    hr_apoyo_inic_ih = models.FloatField(null=True, blank=True)
+    hr_apoyo_inie_dm = models.FloatField(null=True, blank=True)
+    hr_apoyo_inie_ee = models.FloatField(null=True, blank=True)
+    hr_apoyo_inie_sm = models.FloatField(null=True, blank=True)
+    hr_apoyo_inig_ig = models.FloatField(null=True, blank=True)
+    hr_apoyo_inig_pe = models.FloatField(null=True, blank=True)
+    hr_apoyo_inio_ce = models.FloatField(null=True, blank=True)
+    hr_apoyo_inio_es = models.FloatField(null=True, blank=True)
+    hr_apoyo_init = models.FloatField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.proyecto_e.codigo}"
+    
+    class Meta:
+        ordering = ['-created_at']
+
+

@@ -162,7 +162,13 @@ def proyectos_list_view(request):
 # -- Detail View --
 def proyecto_E_detail_view(request, pk):
     if request.method == "GET":
-        proyecto = Proyecto_E.objects.prefetch_related('proyectos_E_estimador_relation__estimador').get(pk=pk)
+        proyecto = get_object_or_404(
+            Proyecto_E.objects.prefetch_related(
+                'proyectos_E_estimador_relation__estimador',
+                'horas_de_apoyo' # Usamos el related_name que definimos en models.py
+            ), 
+            pk=pk
+        )
         template_name = "proyecto_e_detail.html"
 
         context = {"proyecto": proyecto}
