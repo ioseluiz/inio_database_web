@@ -19,6 +19,7 @@ django-import-export==4.3.7
 django-mssql-backend==2.8.1
 django-tailwind==4.0.1
 et_xmlfile==2.0.0
+gunicorn==23.0.0
 idna==3.10
 Jinja2==3.1.6
 markdown-it-py==3.0.0
@@ -28,6 +29,7 @@ mssql-django==1.5
 numpy==2.2.5
 odfpy==1.4.1
 openpyxl==3.1.5
+packaging==25.0
 pandas==2.2.3
 psycopg2-binary==2.9.10
 pycparser==2.22
