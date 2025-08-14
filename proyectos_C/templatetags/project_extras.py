@@ -1,5 +1,5 @@
 from django import template
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 register = template.Library()
 
@@ -24,3 +24,23 @@ def days_between(date1, date2):
     # Ahora que ambos son objetos 'date', la resta es segura.
     # Usamos abs() para obtener siempre un número positivo, lo que simplifica el código.
     return abs((date1 - date2).days)
+
+
+@register.filter(name='subtract_15_days')
+def subtract_15_days(target_date):
+    """
+    Resta 15 días a la fecha proporcionada.
+    Maneja instancias de date y datetime.
+    """
+    # Si la fecha es Nula, devuelve una cadena vacía
+    if target_date is None:
+        return ""
+
+    # Si es un objeto datetime, se convierte a solo fecha
+    if isinstance(target_date, datetime):
+        target_date = target_date.date()
+
+    # Se realiza la resta de los 15 días usando timedelta
+    return target_date - timedelta(days=15)
+
+# --- FIN DEL NUEVO TEMPLATE TAG ---

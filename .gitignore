@@ -6,3 +6,4 @@ data/
 *.csv
 *.xlsx
 entra.txt
+*.dump
