@@ -13,27 +13,23 @@ def SignInView(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
 
-        try:
-            user = CustomUser.objects.get(email=email)
-            user = authenticate(request, email=email, password=password)
+        user = authenticate(request, username=email, password=password)
 
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    messages.success(request, f"Bienvenido de nuevo, {user.username}!")
-                    # Redirect to homepage
-                    return redirect("home:home")
-                else:
-                    messages.warning(request, "El usuario no esta activo")
-                    return redirect("accounts:sign-in")
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                messages.success(request, f"Bienvenido de nuevo, {user.username}!")
+                # Redirect to homepage
+                return redirect("home:home")
             else:
-                messages.warning(request, "El usuario no existe.")
-                return("accounts:sign-in")
-            
-        except:
-            messages.warning(request, "El usuario no existe.")
+                messages.warning(request, "El usuario no esta activo")
+        else:
+                messages.warning(request, "El correo electronico o el password son incorrectos.")
 
+        return redirect("accounts:sign-in")
+    
     return render(request, "accounts/sign-in.html")
+
 
 def SignOutView(request):
     logout(request)

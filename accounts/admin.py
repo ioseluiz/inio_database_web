@@ -1,36 +1,35 @@
+# accounts/admin.py
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.urls import reverse
-from django.http import HttpResponseRedirect
-
+from .forms import CustomUserCreationForm, CustomUserChangeForm
 from .models import CustomUser
 
-
 class CustomUserAdmin(UserAdmin):
-    list_display = ("email","username","is_staff")
-    search_fields = ("email","username")
-    list_filter = ("is_staff","is_active")
+    # Formularios a usar
+    form = CustomUserChangeForm
+    add_form = CustomUserCreationForm
 
-    add_fieldsets = (
-        (None, {
-            "classes": ("wide",),
-              "fields": ("email","username","password1","password2"),
-              },
-              )
+    # Campos a mostrar en la lista de usuarios
+    list_display = ('email', 'username', 'is_staff', 'is_active',)
+    list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
+    search_fields = ('email', 'username',)
+    ordering = ('email',)
+
+    # CAMPOS PARA LA PÁGINA DE EDICIÓN
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ('Personal info', {'fields': ('username', 'first_name', 'last_name')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
 
-    def response_add(self, request, obj, post_url_continue=None):
-        """
-        Determina la respuesta HTTP después de que un objeto ha sido añadido con éxito.
-        Sobrescribe para redirigir a la lista de usuarios en lugar de a la página de edición.
-        """
-        # Construye la URL para la vista de lista (changelist) de tu modelo de usuario
-        # Reemplaza 'tu_app_label' con el nombre real de tu app (ej: 'accounts', 'users')
-        # Reemplaza 'tumodelocustomuser' con el nombre de tu modelo en minúsculas
-        opts = self.model._meta
-        changelist_url = reverse(f"admin:{opts.app_label}_{opts.model_name}_changelist")
-        # Redirige a la lista de usuarios
-        return HttpResponseRedirect(changelist_url)
-    
-admin.site.register(CustomUser, CustomUserAdmin)
+    # CAMPOS PARA LA PÁGINA DE CREACIÓN
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'username', 'password', 'password2'),
+        }),
+    )
 
+admin.site.register(CustomUser, CustomUserAdmin)
