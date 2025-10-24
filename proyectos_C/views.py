@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Proyecto_CC
-from django.db.models import Q
+from django.db.models import Q, Value
+from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
@@ -13,31 +14,87 @@ from secciones.models import Seccion
 from master_projects.models import MasterProject
 
 def proyectos_c_view(request):
-    if request.method == "GET":
-        # Query all Proyectos E
-        proyectos_c_items = Proyecto_CC.objects.prefetch_related('proyectos_CC_estimador_relation__estimador').prefetch_related("proyectos_CC_especificador_relation").all().order_by('-fiscal_year','-codigo')
-        print(len(proyectos_c_items))
-        estimadores = Estimador.objects.filter(is_active=True)
-        especificadores = Especificador.objects.filter(is_active=True)
-        secciones = Seccion.objects.filter(is_active=True)
-        estados = ["ACTIVO","CANCELADO","INACTIVO","TERMINADO"]
-        paginator = Paginator(proyectos_c_items, 10) # Show 10 projects per page
-        page_number = request.GET.get("page")
-        page_obj = paginator.get_page(page_number)
-        total_proyectos = len(proyectos_c_items)
-         
-
-        context = {'total_proyectos': total_proyectos, "page_obj": page_obj, "estimadores":estimadores, "especificadors": especificadores,"secciones": secciones, "estados": estados}
-        return render(request, "proyectos_c/proyectos_c.html",context)
-
-    # Query all Proyectos CC
+    # Esta vista ahora maneja la visualización y el filtrado
     
-    paginator = Paginator(proyectos_c_items, 10) # Show 25 projects per page
+    # Obtener valores de los parámetros GET
+    query = request.GET.get('q')
+    seccion_filter = request.GET.get('seccion')
+    coordinador_filter = request.GET.get('coordinador')
+    estado_filter = request.GET.get('estado')
+    especificador_filter = request.GET.get('especificador')
+    estimador_filter = request.GET.get('estimador')
+
+    # Consulta base
+    proyectos_c_items = Proyecto_CC.objects.prefetch_related(
+        'proyectos_CC_estimador_relation__estimador',
+        'proyectos_CC_especificador_relation__especificador'
+    ).all()
+
+    # Aplicar filtros si existen
+    if query:
+        proyectos_c_items = proyectos_c_items.filter(
+            Q(codigo__icontains=query) | Q(title__icontains=query)
+        ).distinct()
+    
+    if seccion_filter:
+        proyectos_c_items = proyectos_c_items.filter(seccion=seccion_filter)
+        
+    if coordinador_filter:
+        proyectos_c_items = proyectos_c_items.filter(coordinador=coordinador_filter)
+        
+    if estado_filter:
+        proyectos_c_items = proyectos_c_items.filter(estado=estado_filter)
+        
+    if especificador_filter:
+        proyectos_c_items = proyectos_c_items.filter(
+            proyectos_CC_especificador_relation__especificador__id=especificador_filter
+        )
+        
+    if estimador_filter:
+        proyectos_c_items = proyectos_c_items.filter(
+            proyectos_CC_estimador_relation__estimador__id=estimador_filter
+        )
+
+    # Ordenar resultados
+    proyectos_c_items = proyectos_c_items.order_by('-fiscal_year','-codigo')
+    
+    # --- Obtener datos para los menús desplegables ---
+    estimadores = Estimador.objects.filter(is_active=True)
+    especificadores = Especificador.objects.filter(is_active=True)
+    secciones = Seccion.objects.filter(is_active=True)
+    
+    # Obtener coordinadores únicos del modelo Proyecto_CC
+    coordinadores = Proyecto_CC.objects.annotate(
+        coord_nn=Coalesce('coordinador', Value(''))
+    ).values_list('coord_nn', flat=True).distinct().order_by('coord_nn')
+    coordinadores = [c for c in coordinadores if c] # Filtrar valores vacíos
+
+    # Obtener estados desde las choices del modelo
+    estados_choices = Proyecto_CC._meta.get_field('estado').choices 
+
+    # Paginación
+    paginator = Paginator(proyectos_c_items, 10) # Mostrar 10 proyectos por página
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    total_proyectos = len(proyectos_c_items)
+    total_proyectos = proyectos_c_items.count() # Usar count() para eficiencia
 
-    context = {'total_proyectos': total_proyectos, "page_obj": page_obj, "estimadores":estimadores, "secciones": secciones, "estados": estados}
+    context = {
+        'total_proyectos': total_proyectos, 
+        "page_obj": page_obj, 
+        "estimadores": estimadores, 
+        "especificadors": especificadores,
+        "secciones": secciones, 
+        "estados": estados_choices, # Pasar las choices al template
+        "coordinadores": coordinadores, # Nuevo contexto
+        
+        # Devolver los valores de filtro seleccionados al template
+        'query': query,
+        'seccion_filter': seccion_filter,
+        'coordinador_filter': coordinador_filter,
+        'estado_filter': int(estado_filter) if estado_filter else None,
+        'especificador_filter': int(especificador_filter) if especificador_filter else None,
+        'estimador_filter': int(estimador_filter) if estimador_filter else None,
+    }
     return render(request, "proyectos_c/proyectos_c.html", context)
 
 def proyectos_c_detail_view(request, pk):

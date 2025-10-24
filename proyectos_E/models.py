@@ -1,5 +1,7 @@
 from django.db import models
 
+from SIA.models import tblProyectos
+
 class Proyecto_E(models.Model):
     codigo = models.CharField(max_length=25)
     title = models.TextField()
@@ -58,5 +60,13 @@ class HorasApoyo(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+
+
+class Proyecto_E_SIA(models.Model):
+    proyecto_e = models.ForeignKey(Proyecto_E, on_delete=models.CASCADE)
+    sia = models.ForeignKey(tblProyectos, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Proyecto CC: {self.proyecto_cc.codigo} - SIA: {self.sia.CodProyecto}"
 
 

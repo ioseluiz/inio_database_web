@@ -1,7 +1,8 @@
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 
-from .models import Proyecto_E, HorasApoyo
+from .models import Proyecto_E, HorasApoyo, Proyecto_E_SIA
+from SIA.models import tblProyectos
 
 class Proyecto_E_Resource(resources.ModelResource):
     class Meta:
@@ -64,6 +65,30 @@ class HorasApoyo_Resource(resources.ModelResource):
             "hr_apoyo_init",
             
         )
+
+        skip_unchanged = True
+        report_skipped = True
+
+
+class Proyecto_E_SIA_Resource(resources.ModelResource):
+
+    proyecto_e = fields.Field(
+        column_name='proyecto_e',
+        attribute='proyecto_e',
+        widget=ForeignKeyWidget(Proyecto_E, 'codigo')
+    )
+
+    sia = fields.Field(
+        column_name='sia',
+        attribute='sia',
+        widget=ForeignKeyWidget(tblProyectos, 'codigo')
+    )
+
+    class Meta:
+        model = Proyecto_E_SIA
+        import_id_fields = ['proyecto_e', 'sia']
+
+        fields = ('proyecto_e', 'sia')
 
         skip_unchanged = True
         report_skipped = True
