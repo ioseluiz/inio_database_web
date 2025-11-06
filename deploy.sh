@@ -13,7 +13,7 @@ git pull
 pip install -r requirements.txt
 
 # Run the collect static command
-python manage.py collectstatic --no-imput
+python manage.py collectstatic --no-input
 
 # put all other command that required for your specific app
 
