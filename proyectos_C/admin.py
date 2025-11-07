@@ -29,6 +29,6 @@ class Proyecto_CC_Licitacion_Admin(ImportExportModelAdmin):
 class Proyecto_CC_SIA_Admin(ImportExportModelAdmin):
     resource_class = Proyecto_CC_SIA_Resource
     list_display = ('proyecto_cc', 'sia')
-    search_fields = ('proyecto_cc__codigo', 'sia__codProyecto')
+    search_fields = ('proyecto_cc__codigo', 'sia__CodProyecto')
     autocomplete_fields = ['proyecto_cc', 'sia']
 

@@ -85,7 +85,7 @@ class Proyecto_CC_SIA_Resource(resources.ModelResource):
     )
     sia = fields.Field(column_name='sia',
                        attribute='sia',
-                       widget=ForeignKeyWidget(tblProyectos, 'codProyecto'))
+                       widget=ForeignKeyWidget(tblProyectos, 'CodProyecto'))
     
     class Meta:
         model = Proyecto_CC_SIA
