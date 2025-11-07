@@ -7,9 +7,6 @@ from .models import Licitacion, CategoryLicitacion, Propuesta, Enmienda
 from .resources import LicitacionResource, PropuestaResource
 
 
-
-
-
 @admin.register(Licitacion)
 class LicitacionAdmin(ImportExportModelAdmin):
     """

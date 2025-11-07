@@ -1,9 +1,10 @@
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 
-from .models import Proyecto_CC, Proyecto_CC_Estimado_Conceptual, Proyecto_CC_Licitacion
+from .models import Proyecto_CC, Proyecto_CC_Estimado_Conceptual, Proyecto_CC_Licitacion, Proyecto_CC_SIA
 from proyectos_E.models import Proyecto_E
 from licitaciones.models import Licitacion
+from SIA.models import tblProyectos
 
 class Proyecto_CC_Resource(resources.ModelResource):
     class Meta:
@@ -75,5 +76,24 @@ class Proyecto_CC_Licitacion_Resource(resources.ModelResource):
 
         skip_unchanged = True
         report_skipped = True
+
+class Proyecto_CC_SIA_Resource(resources.ModelResource):
+    proyecto_cc = fields.Field(
+        column_name='proyecto_cc',
+        attribute='proyecto_cc',
+        widget=ForeignKeyWidget(Proyecto_CC, 'codigo')
+    )
+    sia = fields.Field(column_name='sia',
+                       attribute='sia',
+                       widget=ForeignKeyWidget(tblProyectos, 'codProyecto'))
+    
+    class Meta:
+        model = Proyecto_CC_SIA
+        import_id_fields = ['proyecto_cc', 'sia']
+        fields = ('proyecto_cc', 'sia')
+
+        skip_unchanged = True
+        report_skipped = True
+    
 
 
