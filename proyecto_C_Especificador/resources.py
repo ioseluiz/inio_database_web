@@ -25,6 +25,6 @@ class Proyecto_CC_EspecificadorResource(resources.ModelResource):
         fields = ("proyecto_cc","especificador")
         import_id_fields =["proyecto_cc","especificador"]
 
-         # --- Important settings for import behaviour ---
+        # --- Important settings for import behaviour ---
         skip_unchanged = True  # If True, rows that have not changed won't be updated
         report_skipped = True  # If True, reports skipped rows and reasons

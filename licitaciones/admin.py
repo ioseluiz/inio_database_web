@@ -1,18 +1,21 @@
 from django.contrib import admin
+from import_export.admin import ImportExportModelAdmin
 
 # Register your models here.
 from .models import Licitacion, CategoryLicitacion, Propuesta, Enmienda
 
-# admin.site.register(Licitacion)
-admin.site.register(CategoryLicitacion)
+from .resources import LicitacionResource, PropuestaResource
+
+
 
 
 
 @admin.register(Licitacion)
-class LicitacionAdmin(admin.ModelAdmin):
+class LicitacionAdmin(ImportExportModelAdmin):
     """
     Registra el modelo Licitacion en el sitio de administración.
     """
+    resource_class = LicitacionResource
     # Esta es la línea clave que solucionará el error.
     # Se basa en el campo 'rfq' que usas en otros lugares.
     search_fields = ['rfq']
@@ -30,9 +33,10 @@ class EnmiendaAdmin(admin.ModelAdmin):
     list_display = ('enmienda_id','licitacion', 'fecha_enmienda','enmienda_desc')
 
 @admin.register(Propuesta)
-class PropuestaAdmin(admin.ModelAdmin):
+class PropuestaAdmin(ImportExportModelAdmin):
     """ 
     Registra el modelo Propuesta en el sitio de administracion.
     """
+    resource_class = PropuestaResource
     search_fields = ['licitacion__rfq']
     list_display = ('licitacion','bid_vendor_name', 'bid_line_amount','bid_status')

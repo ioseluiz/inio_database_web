@@ -11,4 +11,4 @@ from .resources import Proyecto_CC_EstimadorResource
 class Proyecto_CC_EstimadorAdmin(ImportExportModelAdmin):
     resource_class=Proyecto_CC_EstimadorResource
     list_display = ("proyecto_c", "estimador")
-    autocomplete_fields = ['proyecto_c','estimador']
+    sautocomplete_fields = ['proyecto_c','estimador']
