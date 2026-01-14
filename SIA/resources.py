@@ -1,7 +1,7 @@
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 
-from .models import tblProyectos
+from .models import tblProyectos, tblTransacciones
 
 class tblProyectos_Resource(resources.ModelResource):
     class Meta:
@@ -30,3 +30,21 @@ class tblProyectos_Resource(resources.ModelResource):
         # --- Important settings for import behaviour ---
         skip_unchanged = True # If True, rows that have not changed won't be updated
         report_skipped = True # If True, reports skipped rows and reasons
+
+
+class tblTransacciones_Resource(resources.ModelResource):
+    class Meta:
+        model = tblTransacciones
+        fields = (
+            "Fecha",
+            "IP",
+            "CodProyecto",
+            "HoraRegular",
+            "HoraExtra",
+            "HoraComp",
+            "CodRamo"
+        )
+
+        # -- Important settings for import behaviour ---
+        skip_unchanged = True
+        report_skipped = True

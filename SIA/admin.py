@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 
-from .resources import tblProyectos_Resource
+from .resources import tblProyectos_Resource, tblTransacciones_Resource
 from .models import tblProyectos, tblTransacciones
 
 @admin.register(tblProyectos)
@@ -13,7 +13,8 @@ class SIAAdmin(ImportExportModelAdmin):
     search_fields =('CodProyecto','NomProyecto')
 
 @admin.register(tblTransacciones)
-class SIATransaccionesAdmin(admin.ModelAdmin):
+class SIATransaccionesAdmin(ImportExportModelAdmin):
+    resource_class = tblTransacciones_Resource
     # 1. Se añade un método seguro para mostrar el código del proyecto.
     list_display = ('Fecha', 'IP', 'get_proyecto_codproyecto', 'HoraRegular', 'HoraExtra', 'HoraComp')
     

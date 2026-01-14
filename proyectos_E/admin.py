@@ -14,7 +14,7 @@ class Proyecto_EAdmin(ImportExportModelAdmin):
     search_fields =('codigo','title')
 
 @admin.register(HorasApoyo)
-class Proyecto_CC_Licitacion_Admin(ImportExportModelAdmin):
+class Proyecto_E_HorasApoyo_Resource(ImportExportModelAdmin):
     resource_class = HorasApoyo_Resource
     list_display = ('proyecto_e','revision')
     search_fields = ('proyecto_e__codigo', )
