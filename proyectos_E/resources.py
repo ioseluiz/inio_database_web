@@ -70,6 +70,23 @@ class HorasApoyo_Resource(resources.ModelResource):
         report_skipped = True
 
 
+    def import_row(self, row, instance_loader, **kwargs):
+        # Intentamos buscar el código en la base de datos
+        codigo_proyecto = row.get('proyecto_e')
+        exists = Proyecto_E.objects.filter(codigo=codigo_proyecto).exists()
+        
+        if not exists:
+            return super().import_row(row, instance_loader, **kwargs) # Esto fallará
+            # Pero para saltarlo de forma segura:
+            return None # Retornar None indica que no se debe procesar la fila
+
+    def skip_row(self, instance, original, row, import_validation_errors=None):
+        # Si el proyecto_e no se asignó (es None), saltamos la fila
+        if not instance.proyecto_e_id:
+            return True
+        return super().skip_row(instance, original, row, import_validation_errors)
+
+
 class Proyecto_E_SIA_Resource(resources.ModelResource):
 
     proyecto_e = fields.Field(

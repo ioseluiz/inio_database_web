@@ -67,6 +67,6 @@ class Proyecto_E_SIA(models.Model):
     sia = models.ForeignKey(tblProyectos, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Proyecto CC: {self.proyecto_cc.codigo} - SIA: {self.sia.CodProyecto}"
+        return f"Proyecto E: {self.proyecto_e.codigo} - SIA: {self.sia.CodProyecto}"
 
 
