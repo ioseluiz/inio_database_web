@@ -66,6 +66,8 @@ class HorasApoyo_Resource(resources.ModelResource):
             
         )
 
+        import_id_fields = ['proyecto_e']
+
         skip_unchanged = True
         report_skipped = True
 
