@@ -165,13 +165,50 @@ def proyecto_E_detail_view(request, pk):
         proyecto = get_object_or_404(
             Proyecto_E.objects.prefetch_related(
                 'proyectos_E_estimador_relation__estimador',
-                'horas_de_apoyo' # Usamos el related_name que definimos en models.py
+                'horas_de_apoyo' 
             ), 
             pk=pk
         )
+        
+        # 1. Obtenemos la última revisión
+        latest_revision = proyecto.horas_de_apoyo.last()
+        
+        # 2. Inicializamos totales en 0
+        total_diseno = 0
+        total_apoyo = 0
+
+        # 3. Calculamos la suma SOLO si hay una revisión
+        if latest_revision:
+            # Lista de sufijos de tus campos (AR, IC, IE, ..., INIT/Topografía)
+            campos = [
+                'inic_ar', 'inic_ic', 'inic_ie', 'inic_ih',
+                'inie_dm', 'inie_ee', 'inie_sm',
+                'inig_ig', 'inig_pe',
+                'inio_ce', 'inio_es',
+                'init'  # Topografía
+            ]
+
+            # Sumamos Diseño
+            for sufijo in campos:
+                # getattr obtiene el valor del campo dinámicamente: latest_revision.hr_diseno_inic_ar
+                valor = getattr(latest_revision, f'hr_diseno_{sufijo}', 0)
+                # Si el valor es None (vacío en BD), sumamos 0
+                total_diseno += valor if valor is not None else 0
+
+            # Sumamos Apoyo
+            for sufijo in campos:
+                valor = getattr(latest_revision, f'hr_apoyo_{sufijo}', 0)
+                total_apoyo += valor if valor is not None else 0
+
         template_name = "proyecto_e_detail.html"
 
-        context = {"proyecto": proyecto}
+        # 4. Pasamos los totales calculados al contexto
+        context = {
+            "proyecto": proyecto,
+            "latest_revision": latest_revision,
+            "total_diseno": total_diseno, # <--- Nueva variable
+            "total_apoyo": total_apoyo    # <--- Nueva variable
+        }
         return render(request, template_name, context)
     
 def proyecto_e_delete(request, pk):
