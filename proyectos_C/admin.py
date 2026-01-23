@@ -37,4 +37,4 @@ class Proyecto_CC_Secciones_MF_Admin(ImportExportModelAdmin):
     resource_class = Proyecto_CC_Secciones_MF_Resource
     list_display = ('proyecto_cc','seccion')
     search_fields = ('proyecto_cc__codigo','seccion')
-    autocomplete_fields = ['proyecto_cc',]
+    autocomplete_fields = ['proyecto_cc']
