@@ -95,32 +95,37 @@ class Proyecto_CC_SIA_Resource(resources.ModelResource):
         skip_unchanged = True
         report_skipped = True
     
+# 1. CREA ESTA CLASE NUEVA
+class SafeForeignKeyWidget(ForeignKeyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        # En lugar de .get() que explota con duplicados, usamos .filter().first()
+        return self.model.objects.filter(**{self.field: value}).first()
+
 class Proyecto_CC_Secciones_MF_Resource(resources.ModelResource):
+    # 2. USA LA NUEVA CLASE AQUÍ
     proyecto_cc = fields.Field(
         column_name='proyecto_cc',
         attribute='proyecto_cc',
-        widget=ForeignKeyWidget(Proyecto_CC, 'codigo')
+        widget=SafeForeignKeyWidget(Proyecto_CC, 'codigo') # <--- CAMBIO AQUÍ
     )
 
     class Meta:
         model = Proyecto_CC_Secciones_MF
         import_id_fields = ['proyecto_cc', 'seccion']
-
         fields = ('proyecto_cc', 'division', 'seccion', 'descripcion')
-
         skip_unchanged = True
         report_skipped = True
 
     def skip_row(self, instance, original, row, import_validation_errors=None):
-            codigo = row.get('proyecto_cc')
-
-            if not codigo:
-                return True
+        codigo = row.get('proyecto_cc')
+        
+        # Validación de existencia básica
+        if not codigo:
+            return True
             
-            # 3. VERIFICACIÓN CLAVE: Si el proyecto NO existe en la BD, saltamos la línea.
-            # Esto evita el "Internal Server Error"
-            if not Proyecto_CC.objects.filter(codigo=codigo).exists():
-                return True # True significa "SÍ, SALTA ESTA LÍNEA"
+        # Si no existe ninguno, lo saltamos
+        if not Proyecto_CC.objects.filter(codigo=codigo).exists():
+            return True
 
-            return super().skip_row(instance, original, row, import_validation_errors)
+        return super().skip_row(instance, original, row, import_validation_errors)
 
