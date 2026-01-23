@@ -88,3 +88,14 @@ class Proyecto_CC_SIA(models.Model):
 
     def __str__(self):
         return f"Proyecto CC: {self.proyecto_cc.codigo} - SIA: {self.sia.CodProyecto}"
+    
+class Proyecto_CC_Secciones_MF(models.Model):
+    proyecto_cc = models.ForeignKey(Proyecto_CC, on_delete=models.CASCADE)
+    division = models.CharField(max_length=10)
+    seccion = models.CharField(max_length=100)
+    descripcion = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Proyecto CC: {self.proyecto_cc.codigo} - Division: {self.division} - Seccion: {self.seccion}"
+    
+
