@@ -111,3 +111,16 @@ class Proyecto_CC_Secciones_MF_Resource(resources.ModelResource):
         skip_unchanged = True
         report_skipped = True
 
+        def skip_row(self, instance, original, row, import_validation_errors=None):
+            codigo = row.get('proyecto_cc')
+
+            if not codigo:
+                return True
+            
+            # 3. VERIFICACIÓN CLAVE: Si el proyecto NO existe en la BD, saltamos la línea.
+            # Esto evita el "Internal Server Error"
+            if not Proyecto_CC.objects.filter(codigo=codigo).exists():
+                return True # True significa "SÍ, SALTA ESTA LÍNEA"
+
+            return super().skip_row(instance, original, row, import_validation_errors)
+
