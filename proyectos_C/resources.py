@@ -104,7 +104,7 @@ class Proyecto_CC_Secciones_MF_Resource(resources.ModelResource):
 
     class Meta:
         model = Proyecto_CC_Secciones_MF
-        import_id_fields = ['proyecto_cc', 'division', 'seccion']
+        import_id_fields = ['proyecto_cc', 'seccion']
 
         fields = ('proyecto_cc', 'division', 'seccion', 'descripcion')
 
