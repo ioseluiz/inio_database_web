@@ -96,6 +96,12 @@ class Proyecto_CC_Secciones_MF(models.Model):
     descripcion = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"Proyecto CC: {self.proyecto_cc.codigo} - Division: {self.division} - Seccion: {self.seccion}"
+        # Usamos un try/except para que si falta el proyecto, no explote el admin
+        try:
+            cod = self.proyecto_cc.codigo
+        except AttributeError:
+            cod = "SIN ASIGNAR"
+            
+        return f"Proyecto CC: {cod} - Division: {self.division} - Seccion: {self.seccion}"
     
 
