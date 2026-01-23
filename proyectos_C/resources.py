@@ -111,7 +111,7 @@ class Proyecto_CC_Secciones_MF_Resource(resources.ModelResource):
         skip_unchanged = True
         report_skipped = True
 
-        def skip_row(self, instance, original, row, import_validation_errors=None):
+    def skip_row(self, instance, original, row, import_validation_errors=None):
             codigo = row.get('proyecto_cc')
 
             if not codigo:
