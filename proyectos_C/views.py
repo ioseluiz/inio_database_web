@@ -106,6 +106,7 @@ def proyectos_c_detail_view(request, pk):
             'proyecto_cc_licitacion_set__licitacion',
             'proyecto_cc_sia_set__sia',
             'master_proyectos',
+            'proyecto_cc_secciones_mf_set',
         ).get(pk=pk)
         template_name = "proyectos_c/proyecto_c_detail.html"
 
