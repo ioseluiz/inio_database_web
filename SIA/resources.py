@@ -1,5 +1,5 @@
 from import_export import resources, fields
-from import_export.widgets import ForeignKeyWidget
+from import_export.widgets import ForeignKeyWidget, DateTimeWidget
 
 from .models import tblProyectos, tblTransacciones
 
