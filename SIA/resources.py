@@ -45,6 +45,8 @@ class tblTransacciones_Resource(resources.ModelResource):
             "CodRamo"
         )
 
+        import_id_fields = ('Fecha', 'IP', 'CodProyecto')
+
         # -- Important settings for import behaviour ---
         skip_unchanged = True
         report_skipped = True
