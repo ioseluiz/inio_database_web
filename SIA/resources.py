@@ -50,3 +50,22 @@ class tblTransacciones_Resource(resources.ModelResource):
         # -- Important settings for import behaviour ---
         skip_unchanged = True
         report_skipped = True
+
+    def skip_row(self, instance, original, row, import_validation_errors=None):
+        """
+        Verifica si el CodProyecto del CSV existe en la base de datos.
+        Si no existe, salta la línea (retorna True).
+        """
+        cod_proyecto_csv = row.get('CodProyecto')
+        
+        # Si el campo viene vacío, saltamos
+        if not cod_proyecto_csv:
+            return True
+
+        # Verificamos si existe en la tabla tblProyectos
+        if not tblProyectos.objects.filter(CodProyecto=cod_proyecto_csv).exists():
+            # Opcional: Imprimir en consola para saber qué se saltó
+            print(f"Saltando fila: Proyecto {cod_proyecto_csv} no encontrado.")
+            return True
+            
+        return super().skip_row(instance, original, row, import_validation_errors)
