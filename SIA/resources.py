@@ -3,6 +3,15 @@ from import_export.widgets import ForeignKeyWidget
 
 from .models import tblProyectos, tblTransacciones
 
+class SoftForeignKeyWidget(ForeignKeyWidget):
+    def clean(self, value, row=None, **kwargs):
+        try:
+            return super().clean(value, row, **kwargs)
+        except self.model.DoesNotExist:
+            # Si no existe, devolvemos None en lugar de lanzar error.
+            # Esto permite que el proceso continúe y 'skip_row' haga su trabajo.
+            return None
+
 class tblProyectos_Resource(resources.ModelResource):
     class Meta:
         model = tblProyectos
@@ -33,6 +42,21 @@ class tblProyectos_Resource(resources.ModelResource):
 
 
 class tblTransacciones_Resource(resources.ModelResource):
+    # Campos con widgets personalizados
+    Fecha = fields.Field(
+        attribute='Fecha',
+        column_name='Fecha',
+        widget=DateTimeWidget(format='%m/%d/%Y %H:%M')
+    )
+
+    # --- 2. Usamos el Widget "Suave" aquí ---
+    CodProyecto = fields.Field(
+        attribute='CodProyecto',
+        column_name='CodProyecto',
+        # Usamos SoftForeignKeyWidget en lugar del estándar
+        widget=SoftForeignKeyWidget(tblProyectos, field='CodProyecto')
+    )
+
     class Meta:
         model = tblTransacciones
         fields = (
@@ -44,28 +68,19 @@ class tblTransacciones_Resource(resources.ModelResource):
             "HoraComp",
             "CodRamo"
         )
-
         import_id_fields = ('Fecha', 'IP', 'CodProyecto')
-
-        # -- Important settings for import behaviour ---
         skip_unchanged = True
         report_skipped = True
 
+    # --- 3. Método para saltar filas (Igual que antes) ---
     def skip_row(self, instance, original, row, import_validation_errors=None):
-        """
-        Verifica si el CodProyecto del CSV existe en la base de datos.
-        Si no existe, salta la línea (retorna True).
-        """
         cod_proyecto_csv = row.get('CodProyecto')
         
-        # Si el campo viene vacío, saltamos
         if not cod_proyecto_csv:
             return True
 
-        # Verificamos si existe en la tabla tblProyectos
+        # Verificamos manualmente si existe. Si no, SALTAMOS la fila.
         if not tblProyectos.objects.filter(CodProyecto=cod_proyecto_csv).exists():
-            # Opcional: Imprimir en consola para saber qué se saltó
-            print(f"Saltando fila: Proyecto {cod_proyecto_csv} no encontrado.")
             return True
             
         return super().skip_row(instance, original, row, import_validation_errors)
