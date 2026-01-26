@@ -18,6 +18,7 @@ STATUS_PROYECTOS = (
     (11,"ISC"),
     (12,"No Adjudicada"),
     (13,"Pendiente"),
+    (14, "Dueño"),
 )
 
 class Proyecto_CC(models.Model):
