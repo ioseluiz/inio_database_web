@@ -1,7 +1,10 @@
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 
-from .models import Proyecto_SE
+from .models import Proyecto_SE, Proyecto_SE_Estimado_Conceptual, Proyecto_SE_Licitacion, Proyecto_SE_SIA, Proyecto_SE_Secciones_MF
+from proyectos_E.models import Proyecto_E
+from licitaciones.models import Licitacion
+from SIA.models import tblProyectos
 
 class Proyecto_SE_Resource(resources.ModelResource):
     class Meta:
@@ -9,15 +12,119 @@ class Proyecto_SE_Resource(resources.ModelResource):
         fields = (
             "codigo",
             "title",
+            "seccion",
+            "coordinador",
             "fecha_entrada",
-            "fecha_salida",
+            "fecha_envio_FIO",
             "fecha_sol_fondos_aprob",
-            "fecha_sol_fondos_aprob",
+            "fecha_recibo_fondos_aprob",
             "comentarios",
-            "status",
+            "estado",
+            "asignacion_presup_final",
+            "precio_acp"
+
         )
         import_id_fields = ['codigo']
 
         # --- Important settings for import behaviour ---
         skip_unchanged = True # If True, rows that have not changed won't be updated
         report_skipped = True # If True, reports skipped rows and reasons
+
+class Proyecto_SE_Estimado_Conceptal_Resource(resources.ModelResource):
+
+    proyecto_se = fields.Field(
+        column_name='proyecto_se',
+        attribute='proyecto_se',
+        widget=ForeignKeyWidget(Proyecto_SE, 'codigo')
+    )
+
+    estimado_conceptual = fields.Field(
+        column_name='estimado_conceptual',
+        attribute='estimado_conceptual',
+        widget=ForeignKeyWidget(Proyecto_E, 'codigo')
+    )
+
+    class Meta:
+        model = Proyecto_SE_Estimado_Conceptual
+        import_id_fields = ['proyecto_se', 'estimado_conceptual']
+
+        fields = ('proyecto_se', 'estimado_conceptual')
+
+        skip_unchanged = True
+        report_skipped = True
+
+
+class Proyecto_SE_Licitacion_Resource(resources.ModelResource):
+
+    proyecto_se = fields.Field(
+        column_name='proyecto_se',
+        attribute='proyecto_se',
+        widget=ForeignKeyWidget(Proyecto_SE, 'codigo')
+    )
+
+    licitacion = fields.Field(
+        column_name='licitacion',
+        attribute='licitacion',
+        widget=ForeignKeyWidget(Licitacion, 'rfq')
+    )
+
+    class Meta:
+        model = Proyecto_SE_Licitacion
+        import_id_fields = ['proyecto_se', 'licitacion']
+
+        fields = ('proyecto_se', 'licitacion')
+
+        skip_unchanged = True
+        report_skipped = True
+
+class Proyecto_SE_SIA_Resource(resources.ModelResource):
+    proyecto_cc = fields.Field(
+        column_name='proyecto_se',
+        attribute='proyecto_se',
+        widget=ForeignKeyWidget(Proyecto_SE, 'codigo')
+    )
+    sia = fields.Field(column_name='sia',
+                       attribute='sia',
+                       widget=ForeignKeyWidget(tblProyectos, 'CodProyecto'))
+    
+    class Meta:
+        model = Proyecto_SE_SIA
+        import_id_fields = ['proyecto_se', 'sia']
+        fields = ('proyecto_se', 'sia')
+
+        skip_unchanged = True
+        report_skipped = True
+    
+# 1. CREA ESTA CLASE NUEVA
+class SafeForeignKeyWidget(ForeignKeyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        # En lugar de .get() que explota con duplicados, usamos .filter().first()
+        return self.model.objects.filter(**{self.field: value}).first()
+
+class Proyecto_SE_Secciones_MF_Resource(resources.ModelResource):
+    # 2. USA LA NUEVA CLASE AQUÍ
+    proyecto_se = fields.Field(
+        column_name='proyecto_se',
+        attribute='proyecto_se',
+        widget=SafeForeignKeyWidget(Proyecto_SE, 'codigo') # <--- CAMBIO AQUÍ
+    )
+
+    class Meta:
+        model = Proyecto_SE_Secciones_MF
+        import_id_fields = ['proyecto_se', 'seccion']
+        fields = ('proyecto_se', 'division', 'seccion', 'descripcion')
+        skip_unchanged = True
+        report_skipped = True
+
+    def skip_row(self, instance, original, row, import_validation_errors=None):
+        codigo = row.get('proyecto_se')
+        
+        # Validación de existencia básica
+        if not codigo:
+            return True
+            
+        # Si no existe ninguno, lo saltamos
+        if not Proyecto_SE.objects.filter(codigo=codigo).exists():
+            return True
+
+        return super().skip_row(instance, original, row, import_validation_errors)

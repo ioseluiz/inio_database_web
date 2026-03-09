@@ -165,7 +165,8 @@ def proyecto_E_detail_view(request, pk):
         proyecto = get_object_or_404(
             Proyecto_E.objects.prefetch_related(
                 'proyectos_E_estimador_relation__estimador',
-                'horas_de_apoyo' 
+                'horas_de_apoyo',
+                'proyecto_e_sia_set__sia'
             ), 
             pk=pk
         )
