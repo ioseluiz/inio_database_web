@@ -1,5 +1,5 @@
 from import_export import resources, fields, widgets
-from import_export.widgets import ForeignKeyWidget
+from import_export.widgets import ForeignKeyWidget, NumberWidget
 from datetime import datetime
 from .models import tblProyectos, tblTransacciones
 
@@ -65,6 +65,24 @@ class SoftForeignKeyWidget(ForeignKeyWidget):
             return super().clean(value, row, **kwargs)
         except self.model.DoesNotExist:
             return None
+        
+
+class BooleanIntegerWidget(NumberWidget):
+    """
+    Convierte el texto 'False' o 'True' del CSV a 0 o 1, 
+    compatible con un IntegerField.
+    """
+    def clean(self, value, row=None, *args, **kwargs):
+        if not value:
+            return None
+        
+        val_str = str(value).strip().lower()
+        if val_str == 'false':
+            return 0
+        if val_str == 'true':
+            return 1
+            
+        return super().clean(value, row, *args, **kwargs)
 
 # --- RECURSOS ---
 
@@ -80,6 +98,15 @@ class tblProyectos_Resource(resources.ModelResource):
         import_id_fields = ['CodProyecto']
         skip_unchanged = True
         report_skipped = True
+
+        use_bulk = True
+        batch_size = 1000
+
+    def skip_row(self, instance, original, row, import_validation_errors=None):
+        cod_proyecto_csv = row.get('CodProyecto')
+        if cod_proyecto_csv and tblProyectos.objects.filter(CodProyecto=cod_proyecto_csv).exists():
+            return True
+        return super().skip_row(instance, original, row, import_validation_errors)
 
 class tblTransacciones_Resource(resources.ModelResource):
     # Usamos nuestro widget flexible actualizado
