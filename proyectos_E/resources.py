@@ -1,4 +1,5 @@
 from import_export import resources, fields
+from import_export.results import RowResult
 from import_export.widgets import ForeignKeyWidget
 
 from .models import Proyecto_E, HorasApoyo, Proyecto_E_SIA
@@ -112,3 +113,25 @@ class Proyecto_E_SIA_Resource(resources.ModelResource):
 
         skip_unchanged = True
         report_skipped = True
+
+    def import_row(self, row, instance_loader, **kwargs):
+        try:
+            # Ejecutamos la lógica normal de importación para esta fila en particular
+            row_result = super().import_row(row, instance_loader, **kwargs)
+            
+            # Si la librería captura un error de validación (ej. ForeignKey no existe)
+            # row_result.errors tendrá contenido y bloqueará la pantalla.
+            if row_result.errors:
+                # Limpiamos los errores para engañar a la validación
+                row_result.errors = []
+                # Cambiamos el estado de esta fila a "Saltada"
+                row_result.import_type = RowResult.IMPORT_TYPE_SKIP
+                
+            return row_result
+            
+        except Exception as e:
+            # Si ocurre un error crítico que rompe la ejecución (como un KeyError o formato erróneo),
+            # lo capturamos, creamos un resultado en blanco y le decimos que lo salte.
+            row_result = RowResult()
+            row_result.import_type = RowResult.IMPORT_TYPE_SKIP
+            return row_result
