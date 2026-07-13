@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "proyectos_se",
     "contratos",
     "licitaciones",
+    "licitaciones_v2",
     "SIA",
     "master_projects",
     # External Apps

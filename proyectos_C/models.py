@@ -1,5 +1,6 @@
 from django.db import models
 from licitaciones.models import Licitacion
+from licitaciones_v2.models import Licitacion as LicitacionV2
 from proyectos_E.models import Proyecto_E
 from SIA.models import tblProyectos
 
@@ -82,7 +83,16 @@ class Proyecto_CC_Licitacion(models.Model):
 
     def __str__(self):
         return f"Proyecto CC: {self.proyecto_cc.codigo} - Licitacion: {self.licitacion.rfq}"
-    
+
+
+class Proyecto_CC_Licitacion_V2(models.Model):
+    proyecto_cc = models.ForeignKey(Proyecto_CC, on_delete=models.CASCADE)
+    licitacion = models.ForeignKey(LicitacionV2, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Proyecto CC: {self.proyecto_cc.codigo} - Licitacion: {self.licitacion.rfq}"
+
+
 class Proyecto_CC_SIA(models.Model):
     proyecto_cc = models.ForeignKey(Proyecto_CC, on_delete=models.CASCADE)
     sia = models.ForeignKey(tblProyectos, on_delete=models.CASCADE)
