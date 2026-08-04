@@ -14,5 +14,11 @@ jobs:
     runs-on: [self-hosted, linux, prod]
     timeout-minutes: 15
     steps:
+      - name: Sync working tree to origin/main
+        run: |
+          cd /var/www/inio_database_web
+          git fetch origin main
+          git reset --hard origin/main
+          chmod +x deploy.sh
       - name: Run deploy script
         run: /var/www/inio_database_web/deploy.sh
