@@ -10,10 +10,20 @@ TS=$(date +%Y%m%d_%H%M%S)
 echo "==> [$TS] deploy start"
 cd "$APP_DIR"
 
-# Load .env for DB creds
-set -a
-. "$APP_DIR/.env"
-set +a
+# Extract only the 3 vars pg_dump needs.
+# Avoid `. .env` because the file contains values like `{SQL Server}` that
+# would trigger bash brace expansion and fail.
+extract_env() {
+    grep -E "^$1=" "$APP_DIR/.env" | head -1 | cut -d= -f2- \
+        | sed -E 's/^"(.*)"$/\1/;s/^'"'"'(.*)'"'"'$/\1/'
+}
+DB_NAME=$(extract_env DB_NAME)
+DB_USER=$(extract_env DB_USER)
+DB_PASSWORD=$(extract_env DB_PASSWORD)
+if [ -z "$DB_NAME" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ]; then
+    echo "ERROR: DB_NAME/DB_USER/DB_PASSWORD missing from $APP_DIR/.env" >&2
+    exit 1
+fi
 
 # shellcheck disable=SC1091
 source "$VENV/bin/activate"
