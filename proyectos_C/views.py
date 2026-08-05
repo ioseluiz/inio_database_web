@@ -1,17 +1,25 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Proyecto_CC
+from .models import Proyecto_CC, Proyecto_CC_SIA, Proyecto_CC_Estimado_Conceptual
 from django.db.models import Q, Value
 from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
+from django.contrib import messages
+from django.db import transaction
+from django.views.decorators.http import require_POST
 from datetime import timedelta, datetime
 
 from proyecto_C_Especificador.models import Proyecto_C_Especificador
+from proyecto_c_Estimador.models import Proyecto_C_Estimador
 from especificadores.models import Especificador
 from estimadores.models import Estimador
 from secciones.models import Seccion
 from master_projects.models import MasterProject
+from SIA.models import tblProyectos
+from proyectos_E.models import Proyecto_E
+
+from .forms import ProyectoCCForm
 
 def proyectos_c_view(request):
     # Esta vista ahora maneja la visualización y el filtrado
@@ -70,7 +78,7 @@ def proyectos_c_view(request):
     coordinadores = [c for c in coordinadores if c] # Filtrar valores vacíos
 
     # Obtener estados desde las choices del modelo
-    estados_choices = Proyecto_CC._meta.get_field('estado').choices 
+    estados_choices = Proyecto_CC._meta.get_field('estado').choices
 
     # Paginación
     paginator = Paginator(proyectos_c_items, 10) # Mostrar 10 proyectos por página
@@ -78,15 +86,31 @@ def proyectos_c_view(request):
     page_obj = paginator.get_page(page_number)
     total_proyectos = proyectos_c_items.count() # Usar count() para eficiencia
 
+    # Formulario de creación (modal "Nuevo"). Si el POST anterior falló, se
+    # rehidrata desde la sesión y se marca `open_add_modal` para reabrir el modal.
+    prev_post = request.session.pop("proyecto_cc_form_data", None)
+    request.session.pop("proyecto_cc_form_errors", None)
+    if prev_post:
+        create_form = ProyectoCCForm(prev_post)
+        create_form.is_valid()  # dispara la validación para poblar `errors`
+        open_add_modal = True
+    else:
+        create_form = ProyectoCCForm()
+        open_add_modal = False
+
     context = {
-        'total_proyectos': total_proyectos, 
-        "page_obj": page_obj, 
-        "estimadores": estimadores, 
-        "especificadors": especificadores,
-        "secciones": secciones, 
+        'total_proyectos': total_proyectos,
+        "page_obj": page_obj,
+        "estimadores": estimadores,
+        "especificadores": especificadores,
+        "secciones": secciones,
         "estados": estados_choices, # Pasar las choices al template
         "coordinadores": coordinadores, # Nuevo contexto
-        
+
+        # Formulario y flag para el modal de creación
+        "create_form": create_form,
+        "open_add_modal": open_add_modal,
+
         # Devolver los valores de filtro seleccionados al template
         'query': query,
         'seccion_filter': seccion_filter,
@@ -96,6 +120,33 @@ def proyectos_c_view(request):
         'estimador_filter': int(estimador_filter) if estimador_filter else None,
     }
     return render(request, "proyectos_c/proyectos_c.html", context)
+
+
+@require_POST
+def proyecto_c_create_view(request):
+    form = ProyectoCCForm(request.POST)
+    if not form.is_valid():
+        request.session["proyecto_cc_form_data"] = request.POST.dict()
+        request.session["proyecto_cc_form_errors"] = form.errors.get_json_data()
+        messages.error(request, "Revisa los errores del formulario.")
+        return redirect("proyectos_c:proyectos_c")
+
+    with transaction.atomic():
+        proyecto = form.save()  # Proyecto_CC.save() autocalcula fiscal_year
+
+        for est in form.cleaned_data["estimadores"]:
+            Proyecto_C_Estimador.objects.create(proyecto_c=proyecto, estimador=est)
+        for esp in form.cleaned_data["especificadores"]:
+            Proyecto_C_Especificador.objects.create(proyecto_cc=proyecto, especificador=esp)
+        for sia in form.cleaned_data["sias"]:
+            Proyecto_CC_SIA.objects.create(proyecto_cc=proyecto, sia=sia)
+        for ec in form.cleaned_data["estimados_conceptuales"]:
+            Proyecto_CC_Estimado_Conceptual.objects.create(
+                proyecto_cc=proyecto, estimado_conceptual=ec
+            )
+
+    messages.success(request, f"Proyecto CC {proyecto.codigo} creado.")
+    return redirect("proyectos_c:proyecto_c_detail", pk=proyecto.pk)
 
 def proyectos_c_detail_view(request, pk):
     if request.method == "GET":
