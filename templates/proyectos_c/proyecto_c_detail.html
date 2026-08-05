@@ -429,17 +429,6 @@
                             {% endif %}
                         </p>
                     </div>
-
-                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 min-w-0 max-w-xs">
-                        <p class="text-xs font-semibold text-gray-600 uppercase">Duración Contrato ({{ contrato.numero_contrato }})</p>
-                        <p class="text-lg font-medium text-gray-900 mt-1">
-                            {% if contrato.fecha_adjudicacion and contrato.fecha_cierre %}
-                               {{ contrato.fecha_cierre|days_between:contrato.fecha_adjudicacion }} días
-                            {% else %}
-                                <span class="text-gray-400 text-base">No calculable</span>
-                            {% endif %}
-                        </p>
-                    </div>
                 {% endfor %}
             {% endfor %}
         </div>
@@ -500,6 +489,18 @@
                         {% endif %}
                     </p>
                     <p class="text-xs text-gray-500">Adjudicación vs. Cierre</p>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p class="text-xs font-semibold text-gray-600 uppercase">Duración Contrato ({{ contrato.numero_contrato }})</p>
+                    <p class="text-lg font-medium text-gray-900 mt-1">
+                        {% if contrato.fecha_adjudicacion and contrato.fecha_cierre %}
+                            {{ contrato.fecha_cierre|days_between:contrato.fecha_adjudicacion }} días
+                        {% else %}
+                            <span class="text-gray-400 text-base">N/A</span>
+                        {% endif %}
+                    </p>
+                    <p class="text-xs text-gray-500">Adjudicación vs. Cierre Contrato</p>
                 </div>
             {% endfor %} {% endfor %} </div>
 </div>
