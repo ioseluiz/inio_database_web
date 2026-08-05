@@ -32,6 +32,8 @@ urlpatterns = [
     path('proyectosc/', include('proyectos_C.urls')),
     path('contratos/', include('contratos.urls')),
     path('licitaciones/', include('licitaciones.urls')),
+    path('especificadores/', include('especificadores.urls')),
+    path('estimadores/', include('estimadores.urls')),
     # path('sia/', include('SIA.urls')),
      path("__reload__/", include("django_browser_reload.urls")),
 ]
