@@ -2,9 +2,12 @@
 venv/
 __pycache__/
 *.sqlite3
+*.sqlite3.backup_*
 data/
 *.csv
 *.xlsx
 entra.txt
 *.dump
 *.bat
+staticfiles/
+theme/static_src/node_modules/
