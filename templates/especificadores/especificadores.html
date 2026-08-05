@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% block title %}Especificadores{% endblock title %}
+{% block page_content %}
+<div class="container mx-auto px-4 py-8">
+
+    <div class="mb-6">
+        <h1 class="text-3xl font-semibold text-gray-800 mb-4">Especificadores</h1>
+        <button id="add-button" type="button" class="px-3 py-2 text-white bg-primary-brand hover:bg-primary-accent font-bold rounded-lg shadow-md transition duration-150 ease-in-out">
+            <i class="fas fa-add mr-1"></i>Nuevo
+        </button>
+        <h3 class="mt-2 text-sm text-gray-600">Total Registros: {{ total }}</h3>
+
+        <form method="GET" action="{% url 'especificadores:especificadores' %}" class="bg-white p-3 rounded-lg shadow space-y-4 mt-4">
+            <div class="flex items-center space-x-2">
+                <input
+                    type="search"
+                    name="q"
+                    placeholder="Buscar por nombre o iniciales"
+                    value="{{ query|default:'' }}"
+                    class="flex-grow px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                <button
+                    type="submit"
+                    class="bg-primary-brand hover:bg-primary-accent text-white font-semibold px-5 py-2 rounded-r-md transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                >
+                    <i class="fas fa-search mr-1"></i>Buscar
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="mostrar" class="block text-sm font-medium text-gray-700">Mostrar</label>
+                    <select name="mostrar" id="mostrar" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        {% for value, display in mostrar_choices %}
+                        <option value="{{ value }}" {% if value == mostrar %}selected{% endif %}>{{ display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+                <a href="{% url 'especificadores:especificadores' %}" class="text-sm text-gray-600 hover:text-indigo-500">Limpiar filtros</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Iniciales</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for obj, f in rows %}
+                <tr>
+                    <td class="px-4 py-3 text-sm text-gray-900">{{ obj.nombre }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900 font-mono">{{ obj.iniciales }}</td>
+                    <td class="px-4 py-3 text-sm">
+                        {% if obj.is_active %}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Activo</span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-700">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-right space-x-2 whitespace-nowrap">
+                        <button type="button" data-edit-pk="{{ obj.pk }}" class="edit-open-btn inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            <i class="fas fa-edit mr-1"></i>Editar
+                        </button>
+                        <form method="POST" action="{% url 'especificadores:especificador_toggle_activo' obj.pk %}" class="inline toggle-form" data-nombre="{{ obj.nombre }}" data-activo="{{ obj.is_active|yesno:'1,0' }}">
+                            {% csrf_token %}
+                            {% if obj.is_active %}
+                            <button type="submit" class="inline-flex items-center px-3 py-1 border border-transparent rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+                                <i class="fas fa-ban mr-1"></i>Desactivar
+                            </button>
+                            {% else %}
+                            <button type="submit" class="inline-flex items-center px-3 py-1 border border-transparent rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700">
+                                <i class="fas fa-check mr-1"></i>Reactivar
+                            </button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="px-4 py-6 text-center text-sm text-gray-500">No hay registros que coincidan con los filtros.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="flex items-center justify-between mt-4">
+        <div class="text-sm text-gray-600">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</div>
+        <div class="space-x-1">
+            {% if page_obj.has_previous %}
+            <a href="?q={{ query }}&mostrar={{ mostrar }}&page={{ page_obj.previous_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50">Anterior</a>
+            {% endif %}
+            {% if page_obj.has_next %}
+            <a href="?q={{ query }}&mostrar={{ mostrar }}&page={{ page_obj.next_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50">Siguiente</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if messages %}
+    <div class="fixed top-4 right-4 z-50 space-y-2">
+        {% for message in messages %}
+        <div class="px-4 py-2 rounded-md shadow-md text-sm border border-gray-300 {% if message.tags == 'success' %}bg-green-100 text-green-800{% elif message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div id="add-modal" class="modal fixed inset-0 z-50 overflow-y-auto bg-gray-600 bg-opacity-50 hidden" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="modal-content relative z-10 inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <form method="POST" action="{% url 'especificadores:especificador_create' %}">
+                    {% csrf_token %}
+                    <div class="bg-gray-100 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Nuevo Especificador</h3>
+                        <div class="mt-4 space-y-4">
+                            <div>
+                                <label for="{{ create_form.nombre.id_for_label }}" class="block text-sm font-medium text-gray-700">Nombre <span class="text-red-800">*</span></label>
+                                {{ create_form.nombre }}
+                                {% if create_form.nombre.errors %}<p class="mt-1 text-xs text-red-800">{{ create_form.nombre.errors|join:", " }}</p>{% endif %}
+                            </div>
+                            <div>
+                                <label for="{{ create_form.iniciales.id_for_label }}" class="block text-sm font-medium text-gray-700">Iniciales <span class="text-red-800">*</span></label>
+                                {{ create_form.iniciales }}
+                                {% if create_form.iniciales.errors %}<p class="mt-1 text-xs text-red-800">{{ create_form.iniciales.errors|join:", " }}</p>{% endif %}
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                {{ create_form.is_active }}
+                                <label for="{{ create_form.is_active.id_for_label }}" class="text-sm font-medium text-gray-700">Activo</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm">Aceptar</button>
+                        <button type="button" class="close-modal-btn mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" data-modal-id="add-modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% for obj, f in rows %}
+    <div id="edit-modal-{{ obj.pk }}" class="modal fixed inset-0 z-50 overflow-y-auto bg-gray-600 bg-opacity-50 hidden" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="modal-content relative z-10 inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <form method="POST" action="{% url 'especificadores:especificador_update' obj.pk %}">
+                    {% csrf_token %}
+                    <div class="bg-gray-100 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Editar Especificador</h3>
+                        <div class="mt-4 space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Nombre <span class="text-red-800">*</span></label>
+                                {{ f.nombre }}
+                                {% if f.nombre.errors %}<p class="mt-1 text-xs text-red-800">{{ f.nombre.errors|join:", " }}</p>{% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Iniciales <span class="text-red-800">*</span></label>
+                                {{ f.iniciales }}
+                                {% if f.iniciales.errors %}<p class="mt-1 text-xs text-red-800">{{ f.iniciales.errors|join:", " }}</p>{% endif %}
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                {{ f.is_active }}
+                                <label class="text-sm font-medium text-gray-700">Activo</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm">Guardar</button>
+                        <button type="button" class="close-modal-btn mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" data-modal-id="edit-modal-{{ obj.pk }}">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            function openModal(m) { if (m) m.classList.remove('hidden'); }
+            function closeModal(m) { if (m) m.classList.add('hidden'); }
+
+            const addButton = document.getElementById('add-button');
+            const addModal = document.getElementById('add-modal');
+            if (addButton && addModal) {
+                addButton.addEventListener('click', () => openModal(addModal));
+            }
+
+            document.querySelectorAll('.edit-open-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const pk = btn.dataset.editPk;
+                    openModal(document.getElementById('edit-modal-' + pk));
+                });
+            });
+
+            document.querySelectorAll('.close-modal-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    closeModal(document.getElementById(btn.dataset.modalId));
+                });
+            });
+
+            window.addEventListener('click', (event) => {
+                document.querySelectorAll('.modal:not(.hidden)').forEach(m => {
+                    if (event.target === m) closeModal(m);
+                });
+            });
+
+            document.querySelectorAll('.toggle-form').forEach(f => {
+                f.addEventListener('submit', (e) => {
+                    const activo = f.dataset.activo === '1';
+                    const nombre = f.dataset.nombre;
+                    const verbo = activo ? 'desactivar' : 'reactivar';
+                    if (!window.confirm('¿Seguro que deseas ' + verbo + ' "' + nombre + '"?')) {
+                        e.preventDefault();
+                    }
+                });
+            });
+
+            {% if open_add_modal %}openModal(addModal);{% endif %}
+            {% if open_edit_modal_pk %}openModal(document.getElementById('edit-modal-{{ open_edit_modal_pk }}'));{% endif %}
+        });
+    </script>
+
+</div>
+{% endblock page_content %}
