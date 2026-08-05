@@ -1,5 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Proyecto_CC, Proyecto_CC_SIA, Proyecto_CC_Estimado_Conceptual
+from .models import (
+    Proyecto_CC,
+    Proyecto_CC_SIA,
+    Proyecto_CC_Estimado_Conceptual,
+    Proyecto_CC_Licitacion,
+    Proyecto_CC_Licitacion_V2,
+)
 from django.db.models import Q, Value
 from django.db.models.functions import Coalesce
 from django.urls import reverse
@@ -19,7 +25,7 @@ from master_projects.models import MasterProject
 from SIA.models import tblProyectos
 from proyectos_E.models import Proyecto_E
 
-from .forms import ProyectoCCForm
+from .forms import ProyectoCCForm, ProyectoCCEditForm
 
 def proyectos_c_view(request):
     # Esta vista ahora maneja la visualización y el filtrado
@@ -150,19 +156,37 @@ def proyecto_c_create_view(request):
 
 def proyectos_c_detail_view(request, pk):
     if request.method == "GET":
-        proyecto = Proyecto_CC.objects.prefetch_related(
-            'proyectos_CC_estimador_relation__estimador',
-            'proyectos_CC_especificador_relation__especificador',
-            'proyectos_CC_estimado_conceptual_cc__estimado_conceptual',
-            'proyecto_cc_licitacion_set__licitacion',
-            'proyecto_cc_sia_set__sia',
-            'master_proyectos',
-            'proyecto_cc_secciones_mf_set',
-        ).get(pk=pk)
-        template_name = "proyectos_c/proyecto_c_detail.html"
+        proyecto = get_object_or_404(
+            Proyecto_CC.objects.prefetch_related(
+                'proyectos_CC_estimador_relation__estimador',
+                'proyectos_CC_especificador_relation__especificador',
+                'proyectos_CC_estimado_conceptual_cc__estimado_conceptual',
+                'proyecto_cc_licitacion_set__licitacion',
+                'proyecto_cc_licitacion_v2_set__licitacion',
+                'proyecto_cc_sia_set__sia',
+                'master_proyectos',
+                'proyecto_cc_secciones_mf_set',
+            ),
+            pk=pk,
+        )
 
-        context = {"proyecto": proyecto}
-        return render(request, template_name, context)
+        # Rehidratar el modal de edición si el POST previo falló su validación.
+        prev = request.session.pop("edit_form_data", None)
+        request.session.pop("edit_form_errors", None)
+        if prev:
+            edit_form = ProyectoCCEditForm(prev, instance=proyecto)
+            edit_form.is_valid()  # popula edit_form.errors
+            open_edit_modal = True
+        else:
+            edit_form = ProyectoCCEditForm(instance=proyecto)
+            open_edit_modal = False
+
+        context = {
+            "proyecto": proyecto,
+            "edit_form": edit_form,
+            "open_edit_modal": open_edit_modal,
+        }
+        return render(request, "proyectos_c/proyecto_c_detail.html", context)
 
 
 def proyectos_list_view(request):
@@ -210,13 +234,60 @@ def proyectos_list_view(request):
 
 
     
+@require_POST
 def proyecto_c_delete(request, pk):
-    print('Delete...')
-    context = {}
-    # Delete an item
-    proyecto = Proyecto_CC.objects.get(pk=pk)
+    """Delete a Proyecto_CC. Requires POST + CSRF to prevent accidental or
+    forged deletion. Join records cascade via on_delete=CASCADE."""
+    proyecto = get_object_or_404(Proyecto_CC, pk=pk)
+    codigo = proyecto.codigo
     proyecto.delete()
-    return redirect(reverse('proyectos_c:proyectos_c'))
+    messages.success(request, f"Proyecto CC {codigo} eliminado.")
+    return redirect("proyectos_c:proyectos_c")
+
+
+@require_POST
+def proyecto_c_update_view(request, pk):
+    """Update an existing Proyecto_CC and replace its join records atomically."""
+    proyecto = get_object_or_404(Proyecto_CC, pk=pk)
+    form = ProyectoCCEditForm(request.POST, instance=proyecto)
+    if not form.is_valid():
+        request.session["edit_form_data"] = request.POST.dict()
+        request.session["edit_form_errors"] = form.errors.get_json_data()
+        messages.error(request, "Revisa los errores del formulario.")
+        return redirect("proyectos_c:proyecto_c_detail", pk=pk)
+
+    with transaction.atomic():
+        proyecto = form.save()  # Proyecto_CC.save() recalcula fiscal_year
+
+        # Reemplazar join records: delete-all + recreate para cada relación.
+        Proyecto_C_Estimador.objects.filter(proyecto_c=proyecto).delete()
+        for est in form.cleaned_data["estimadores"]:
+            Proyecto_C_Estimador.objects.create(proyecto_c=proyecto, estimador=est)
+
+        Proyecto_C_Especificador.objects.filter(proyecto_cc=proyecto).delete()
+        for esp in form.cleaned_data["especificadores"]:
+            Proyecto_C_Especificador.objects.create(proyecto_cc=proyecto, especificador=esp)
+
+        Proyecto_CC_SIA.objects.filter(proyecto_cc=proyecto).delete()
+        for sia in form.cleaned_data["sias"]:
+            Proyecto_CC_SIA.objects.create(proyecto_cc=proyecto, sia=sia)
+
+        Proyecto_CC_Estimado_Conceptual.objects.filter(proyecto_cc=proyecto).delete()
+        for ec in form.cleaned_data["estimados_conceptuales"]:
+            Proyecto_CC_Estimado_Conceptual.objects.create(
+                proyecto_cc=proyecto, estimado_conceptual=ec
+            )
+
+        Proyecto_CC_Licitacion.objects.filter(proyecto_cc=proyecto).delete()
+        for lic in form.cleaned_data["licitaciones"]:
+            Proyecto_CC_Licitacion.objects.create(proyecto_cc=proyecto, licitacion=lic)
+
+        Proyecto_CC_Licitacion_V2.objects.filter(proyecto_cc=proyecto).delete()
+        for lic in form.cleaned_data["licitaciones_v2"]:
+            Proyecto_CC_Licitacion_V2.objects.create(proyecto_cc=proyecto, licitacion=lic)
+
+    messages.success(request, f"Proyecto CC {proyecto.codigo} actualizado.")
+    return redirect("proyectos_c:proyecto_c_detail", pk=pk)
 
 # --- VISTA PARA DATOS DEL GANTT (MODIFICADA) ---
 def proyecto_gantt_data(request, pk):

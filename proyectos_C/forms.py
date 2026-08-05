@@ -6,6 +6,8 @@ from estimadores.models import Estimador
 from SIA.models import tblProyectos
 from proyectos_E.models import Proyecto_E
 from secciones.models import Seccion
+from licitaciones.models import Licitacion
+from licitaciones_v2.models import Licitacion as LicitacionV2
 
 
 TW_INPUT = (
@@ -118,3 +120,54 @@ class ProyectoCCForm(forms.ModelForm):
         self.fields["codigo"].required = True
         self.fields["fecha_sol_fondos_aprob"].input_formats = ["%Y-%m-%dT%H:%M"]
         self.fields["fecha_recibo_fondos_aprob"].input_formats = ["%Y-%m-%dT%H:%M"]
+
+        # El __str__ del modelo Especificador devuelve `nombre`, pero en los
+        # selectores del formulario preferimos las iniciales (más compactas).
+        self.fields["especificadores"].label_from_instance = lambda esp: esp.iniciales
+
+
+class ProyectoCCEditForm(ProyectoCCForm):
+    """Form for editing existing Proyecto_CC.
+
+    Extends the create form with two extra M2M-like selectors (Licitación
+    and Licitación V2) that were not part of the create flow, and pre-fills
+    the `initial` for every M2M based on the current join records so the
+    modal opens with the existing selections visible.
+    """
+
+    licitaciones = forms.ModelMultipleChoiceField(
+        queryset=Licitacion.objects.all().order_by("-rfq"),
+        required=False,
+        widget=forms.SelectMultiple(attrs={"class": TW_SELECT, "size": 6}),
+        label="Licitación",
+        help_text="Escribe para buscar y elige una o varias.",
+    )
+    licitaciones_v2 = forms.ModelMultipleChoiceField(
+        queryset=LicitacionV2.objects.all().order_by("-rfq"),
+        required=False,
+        widget=forms.SelectMultiple(attrs={"class": TW_SELECT, "size": 6}),
+        label="Licitación V2",
+        help_text="Escribe para buscar y elige una o varias.",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields["estimadores"].initial = Estimador.objects.filter(
+                proyecto_c_estimador__proyecto_c=self.instance
+            )
+            self.fields["especificadores"].initial = Especificador.objects.filter(
+                proyecto_c_especificador__proyecto_cc=self.instance
+            )
+            self.fields["sias"].initial = tblProyectos.objects.filter(
+                proyecto_cc_sia__proyecto_cc=self.instance
+            )
+            self.fields["estimados_conceptuales"].initial = Proyecto_E.objects.filter(
+                proyectos_CC_estimado_conceptual_e__proyecto_cc=self.instance
+            )
+            self.fields["licitaciones"].initial = Licitacion.objects.filter(
+                proyecto_cc_licitacion__proyecto_cc=self.instance
+            )
+            self.fields["licitaciones_v2"].initial = LicitacionV2.objects.filter(
+                proyecto_cc_licitacion_v2__proyecto_cc=self.instance
+            )

@@ -2,7 +2,24 @@
 {% load project_extras %}
 {% block page_content %}
 
+{% if messages %}
+<div class="fixed top-4 right-4 z-50 space-y-2">
+    {% for message in messages %}
+    <div class="px-4 py-2 rounded-md shadow-md text-sm border border-gray-300 {% if message.tags == 'success' %}bg-green-100 text-green-800{% elif message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 <style>
+    /* Botón destructivo (fondo rojo, texto blanco). Tailwind v4 compilado en
+       este proyecto no tiene `bg-red-600`/`hover:bg-red-700`, así que las
+       definimos aquí en lugar de forzar un rebuild. */
+    .btn-danger { background-color: #dc2626; color: #ffffff; }
+    .btn-danger:hover { background-color: #b91c1c; }
+    .btn-danger:focus { outline: 2px solid #ef4444; outline-offset: 2px; }
+    .icon-danger { color: #b91c1c; }
     .gantt .bar-progress {
         fill: #60a5fa; /* Un azul más moderno */
     }
@@ -36,7 +53,18 @@
     /* --- FIN: AÑADE ESTOS ESTILOS --- */
 </style>
 
-<div class="bg-white p-6 rounded-lg shadow-md w-full md:w-3/4 lg:w-3/4"> <h1 class="text-2xl font-semibold text-gray-800 mb-6 border-b pb-4">Proyecto CC</h1>
+<div class="bg-white p-6 rounded-lg shadow-md w-full md:w-3/4 lg:w-3/4">
+    <div class="flex items-center justify-between border-b pb-4 mb-6">
+        <h1 class="text-2xl font-semibold text-gray-800">Proyecto CC</h1>
+        <div class="flex gap-2">
+            <button id="update-button" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <i class="fas fa-edit mr-2"></i>Editar
+            </button>
+            <button id="delete-button" type="button" class="btn-danger inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm focus:outline-none">
+                <i class="fas fa-trash mr-2"></i>Eliminar
+            </button>
+        </div>
+    </div>
 
     <div class="space-y-4">
         <div>
@@ -475,17 +503,189 @@
 
     
 
-    <div class="mt-8 pt-5 border-t border-gray-200 flex justify-end space-x-3">
-        <button id="update-button" type="button" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            Actualizar
-        </button>
-        <button id="delete-button" type="button" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            Eliminar
-        </button>
-    </div>
 </div>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.css">
 <script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/css/tom-select.min.css">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/js/tom-select.complete.min.js"></script>
+
+<div id="edit-modal" class="modal fixed inset-0 z-50 overflow-y-auto bg-gray-600 bg-opacity-50 hidden" aria-labelledby="edit-modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="modal-content relative z-10 inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <form id="edit-form" method="POST" action="{% url 'proyectos_c:proyecto_c_update' proyecto.pk %}">
+                {% csrf_token %}
+                <div class="bg-gray-100 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="edit-modal-title">
+                                Editar Proyecto CC &mdash; {{ proyecto.codigo }}
+                            </h3>
+
+                            {% if edit_form.non_field_errors %}
+                            <div class="mt-3 p-3 rounded-md bg-red-100 border border-gray-300 text-sm text-red-800">
+                                {{ edit_form.non_field_errors }}
+                            </div>
+                            {% endif %}
+
+                            <div class="mt-4 space-y-4">
+                                <div>
+                                    <label for="{{ edit_form.codigo.id_for_label }}" class="block text-sm font-medium text-gray-700">Código <span class="text-red-800">*</span></label>
+                                    {{ edit_form.codigo }}
+                                    {% if edit_form.codigo.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.codigo.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.title.id_for_label }}" class="block text-sm font-medium text-gray-700">Título</label>
+                                    {{ edit_form.title }}
+                                    {% if edit_form.title.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.title.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.seccion.id_for_label }}" class="block text-sm font-medium text-gray-700">Sección</label>
+                                    {{ edit_form.seccion }}
+                                    {% if edit_form.seccion.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.seccion.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.coordinador.id_for_label }}" class="block text-sm font-medium text-gray-700">Coordinador</label>
+                                    {{ edit_form.coordinador }}
+                                    {% if edit_form.coordinador.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.coordinador.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.fecha_entrada.id_for_label }}" class="block text-sm font-medium text-gray-700">Fecha de Entrada</label>
+                                    {{ edit_form.fecha_entrada }}
+                                    {% if edit_form.fecha_entrada.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.fecha_entrada.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.fecha_envio_FIO.id_for_label }}" class="block text-sm font-medium text-gray-700">Fecha de Envío a FIO</label>
+                                    {{ edit_form.fecha_envio_FIO }}
+                                    {% if edit_form.fecha_envio_FIO.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.fecha_envio_FIO.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.fecha_sol_fondos_aprob.id_for_label }}" class="block text-sm font-medium text-gray-700">Fecha Solicitud Fondos Aprobados</label>
+                                    {{ edit_form.fecha_sol_fondos_aprob }}
+                                    {% if edit_form.fecha_sol_fondos_aprob.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.fecha_sol_fondos_aprob.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.fecha_recibo_fondos_aprob.id_for_label }}" class="block text-sm font-medium text-gray-700">Fecha Recibo Fondos Aprobados</label>
+                                    {{ edit_form.fecha_recibo_fondos_aprob }}
+                                    {% if edit_form.fecha_recibo_fondos_aprob.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.fecha_recibo_fondos_aprob.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.asignacion_presup_final.id_for_label }}" class="block text-sm font-medium text-gray-700">Asignación Presupuestaria Final</label>
+                                    {{ edit_form.asignacion_presup_final }}
+                                    {% if edit_form.asignacion_presup_final.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.asignacion_presup_final.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.precio_acp.id_for_label }}" class="block text-sm font-medium text-gray-700">Precio ACP</label>
+                                    {{ edit_form.precio_acp }}
+                                    {% if edit_form.precio_acp.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.precio_acp.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.estado.id_for_label }}" class="block text-sm font-medium text-gray-700">Estado</label>
+                                    {{ edit_form.estado }}
+                                    {% if edit_form.estado.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.estado.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.estimadores.id_for_label }}" class="block text-sm font-medium text-gray-700">Estimador(es)</label>
+                                    {{ edit_form.estimadores }}
+                                    <p class="mt-1 text-xs text-gray-500">{{ edit_form.estimadores.help_text }}</p>
+                                    {% if edit_form.estimadores.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.estimadores.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.especificadores.id_for_label }}" class="block text-sm font-medium text-gray-700">Especificador(es)</label>
+                                    {{ edit_form.especificadores }}
+                                    <p class="mt-1 text-xs text-gray-500">{{ edit_form.especificadores.help_text }}</p>
+                                    {% if edit_form.especificadores.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.especificadores.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.sias.id_for_label }}" class="block text-sm font-medium text-gray-700">SIA</label>
+                                    {{ edit_form.sias }}
+                                    <p class="mt-1 text-xs text-gray-500">{{ edit_form.sias.help_text }}</p>
+                                    {% if edit_form.sias.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.sias.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.estimados_conceptuales.id_for_label }}" class="block text-sm font-medium text-gray-700">Estimados Conceptuales</label>
+                                    {{ edit_form.estimados_conceptuales }}
+                                    <p class="mt-1 text-xs text-gray-500">{{ edit_form.estimados_conceptuales.help_text }}</p>
+                                    {% if edit_form.estimados_conceptuales.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.estimados_conceptuales.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.licitaciones.id_for_label }}" class="block text-sm font-medium text-gray-700">Licitación</label>
+                                    {{ edit_form.licitaciones }}
+                                    <p class="mt-1 text-xs text-gray-500">{{ edit_form.licitaciones.help_text }}</p>
+                                    {% if edit_form.licitaciones.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.licitaciones.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.licitaciones_v2.id_for_label }}" class="block text-sm font-medium text-gray-700">Licitación V2</label>
+                                    {{ edit_form.licitaciones_v2 }}
+                                    <p class="mt-1 text-xs text-gray-500">{{ edit_form.licitaciones_v2.help_text }}</p>
+                                    {% if edit_form.licitaciones_v2.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.licitaciones_v2.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ edit_form.comentarios.id_for_label }}" class="block text-sm font-medium text-gray-700">Comentarios</label>
+                                    {{ edit_form.comentarios }}
+                                    {% if edit_form.comentarios.errors %}<p class="mt-1 text-xs text-red-800">{{ edit_form.comentarios.errors|join:", " }}</p>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Guardar
+                    </button>
+                    <button type="button" id="close-edit-modal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="delete-confirm-modal" class="modal fixed inset-0 z-50 overflow-y-auto bg-gray-600 bg-opacity-50 hidden" aria-labelledby="delete-modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="modal-content relative z-10 inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm sm:w-full">
+            <form method="POST" action="{% url 'proyectos_c:proyecto_c_delete' proyecto.pk %}">
+                {% csrf_token %}
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <i class="fas fa-exclamation-triangle icon-danger"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="delete-modal-title">
+                                Eliminar Proyecto CC
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">
+                                    Se eliminará permanentemente el proyecto <strong>{{ proyecto.codigo }}</strong>
+                                    y todos sus registros relacionados (estimadores, especificadores, SIA,
+                                    estimados conceptuales, licitaciones). Esta acción no se puede deshacer.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="submit" class="btn-danger w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                        Eliminar
+                    </button>
+                    <button type="button" id="close-delete-modal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <div id="mf-modal" class="relative z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     
@@ -664,6 +864,59 @@
                 toggleModal(false);
             }
         });
+
+        // --- Modales de edición y eliminación ---
+        const editModal = document.getElementById('edit-modal');
+        const deleteModal = document.getElementById('delete-confirm-modal');
+        const editButton = document.getElementById('update-button');
+        const deleteButton = document.getElementById('delete-button');
+        const closeEditBtn = document.getElementById('close-edit-modal');
+        const closeDeleteBtn = document.getElementById('close-delete-modal');
+
+        function openBoxModal(m) {
+            if (m) { m.classList.remove('hidden'); document.body.classList.add('modal-open'); }
+        }
+        function closeBoxModal(m) {
+            if (m) {
+                m.classList.add('hidden');
+                if (!document.querySelector('.modal:not(.hidden)')) {
+                    document.body.classList.remove('modal-open');
+                }
+            }
+        }
+
+        if (editButton) editButton.addEventListener('click', () => openBoxModal(editModal));
+        if (closeEditBtn) closeEditBtn.addEventListener('click', () => closeBoxModal(editModal));
+        if (deleteButton) deleteButton.addEventListener('click', () => openBoxModal(deleteModal));
+        if (closeDeleteBtn) closeDeleteBtn.addEventListener('click', () => closeBoxModal(deleteModal));
+
+        window.addEventListener('click', (event) => {
+            if (event.target === editModal) closeBoxModal(editModal);
+            if (event.target === deleteModal) closeBoxModal(deleteModal);
+        });
+
+        // --- Tom Select para los 6 selects múltiples del modal de edición ---
+        if (window.TomSelect) {
+            const tsOpts = { plugins: ['remove_button'], maxOptions: null, hidePlaceholder: true };
+            const tsTargets = [
+                ['id_estimadores', 'Escribe para buscar estimadores...'],
+                ['id_especificadores', 'Escribe para buscar especificadores...'],
+                ['id_sias', 'Escribe para buscar SIA...'],
+                ['id_estimados_conceptuales', 'Escribe para buscar estimados conceptuales...'],
+                ['id_licitaciones', 'Escribe para buscar licitaciones...'],
+                ['id_licitaciones_v2', 'Escribe para buscar licitaciones V2...'],
+            ];
+            tsTargets.forEach(([id, placeholder]) => {
+                const el = document.getElementById(id);
+                if (el) new TomSelect(el, { ...tsOpts, placeholder });
+            });
+        }
+
+        // Reabrir el modal de edición automáticamente si el server nos devuelve
+        // errores de validación (mantiene los valores tecleados por el usuario).
+        {% if open_edit_modal %}
+        openBoxModal(editModal);
+        {% endif %}
     });
 </script>
 {% endblock %}

@@ -8,6 +8,7 @@ urlpatterns = [
     path('proyectos-c/', views.proyectos_c_view, name="proyectos_c"),
     path('proyectos-c/nuevo/', views.proyecto_c_create_view, name='proyecto_c_create'),
     path('proyectos-c/<int:pk>', views.proyectos_c_detail_view, name='proyecto_c_detail'),
+    path('proyectos-c/<int:pk>/editar/', views.proyecto_c_update_view, name='proyecto_c_update'),
     path('proyectos-c-search/', views.proyectos_list_view, name='proyectos-c-list'),
     path('proyectos-c/<int:pk>/delete',views.proyecto_c_delete, name='proyecto_c_delete'),
     path('api/gantt-data/<int:pk>/', views.proyecto_gantt_data, name='proyecto_gantt_data'),
