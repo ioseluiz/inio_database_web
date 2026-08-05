@@ -112,7 +112,37 @@ class Proyecto_CC_Secciones_MF(models.Model):
             cod = self.proyecto_cc.codigo
         except AttributeError:
             cod = "SIN ASIGNAR"
-            
+
         return f"Proyecto CC: {cod} - Division: {self.division} - Seccion: {self.seccion}"
-    
+
+
+class Proyecto_CC_Cronograma(models.Model):
+    proyecto_cc = models.OneToOneField(
+        Proyecto_CC,
+        on_delete=models.CASCADE,
+        related_name="cronograma",
+    )
+    inicio = models.DateField(null=True, blank=True)
+    entrega_50_porciento = models.DateField(null=True, blank=True)
+    entrega_90_porciento = models.DateField(null=True, blank=True)
+    entrega_owner = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Cronograma {self.proyecto_cc.codigo}"
+
+
+class Proyecto_CC_Fechas_Actual(models.Model):
+    proyecto_cc = models.OneToOneField(
+        Proyecto_CC,
+        on_delete=models.CASCADE,
+        related_name="fechas_actual",
+    )
+    inicio_actual = models.DateField(null=True, blank=True)
+    entrega_50_porciento_actual = models.DateField(null=True, blank=True)
+    entrega_90_porciento_actual = models.DateField(null=True, blank=True)
+    inicio_division_review = models.DateField(null=True, blank=True)
+    fin_division_review = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Fechas Actuales {self.proyecto_cc.codigo}"
 
