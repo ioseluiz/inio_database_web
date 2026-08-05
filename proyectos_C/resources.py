@@ -1,7 +1,7 @@
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 
-from .models import Proyecto_CC, Proyecto_CC_Estimado_Conceptual, Proyecto_CC_Licitacion, Proyecto_CC_Licitacion_V2, Proyecto_CC_SIA, Proyecto_CC_Secciones_MF
+from .models import Proyecto_CC, Proyecto_CC_Estimado_Conceptual, Proyecto_CC_Licitacion, Proyecto_CC_Licitacion_V2, Proyecto_CC_SIA, Proyecto_CC_Secciones_MF, Proyecto_CC_Cronograma, Proyecto_CC_Fechas_Actual
 from proyectos_E.models import Proyecto_E
 from licitaciones.models import Licitacion
 from licitaciones_v2.models import Licitacion as LicitacionV2
@@ -144,14 +144,47 @@ class Proyecto_CC_Secciones_MF_Resource(resources.ModelResource):
 
     def skip_row(self, instance, original, row, import_validation_errors=None):
         codigo = row.get('proyecto_cc')
-        
+
         # Validación de existencia básica
         if not codigo:
             return True
-            
+
         # Si no existe ninguno, lo saltamos
         if not Proyecto_CC.objects.filter(codigo=codigo).exists():
             return True
 
         return super().skip_row(instance, original, row, import_validation_errors)
+
+
+class Proyecto_CC_Cronograma_Resource(resources.ModelResource):
+    proyecto_cc = fields.Field(
+        column_name='proyecto_cc',
+        attribute='proyecto_cc',
+        widget=ForeignKeyWidget(Proyecto_CC, 'codigo'),
+    )
+
+    class Meta:
+        model = Proyecto_CC_Cronograma
+        import_id_fields = ['proyecto_cc']
+        fields = ('proyecto_cc', 'inicio', 'entrega_50_porciento',
+                  'entrega_90_porciento', 'entrega_owner')
+        skip_unchanged = True
+        report_skipped = True
+
+
+class Proyecto_CC_Fechas_Actual_Resource(resources.ModelResource):
+    proyecto_cc = fields.Field(
+        column_name='proyecto_cc',
+        attribute='proyecto_cc',
+        widget=ForeignKeyWidget(Proyecto_CC, 'codigo'),
+    )
+
+    class Meta:
+        model = Proyecto_CC_Fechas_Actual
+        import_id_fields = ['proyecto_cc']
+        fields = ('proyecto_cc', 'inicio_actual', 'entrega_50_porciento_actual',
+                  'entrega_90_porciento_actual', 'inicio_division_review',
+                  'fin_division_review')
+        skip_unchanged = True
+        report_skipped = True
 
