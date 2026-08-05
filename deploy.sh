@@ -50,7 +50,9 @@ echo "==> check --deploy"
 python manage.py check --deploy
 
 echo "==> collectstatic"
-python manage.py collectstatic --no-input
+# --clear removes staticfiles/ before copying so mtime comparisons after
+# `git reset --hard` cannot cause collectstatic to skip updated source files.
+python manage.py collectstatic --no-input --clear
 
 echo "==> reload nginx + restart gunicorn"
 sudo systemctl reload nginx
