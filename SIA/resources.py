@@ -1,7 +1,7 @@
 from import_export import resources, fields, widgets
 from import_export.widgets import ForeignKeyWidget, NumberWidget
 from datetime import datetime
-from .models import tblProyectos, tblTransacciones
+from .models import tblProyectos, tblTransacciones, tblUsuarios
 
 # --- 1. Widget de Fecha "Todo Terreno" ---
 class FlexibleDateTimeWidget(widgets.Widget):
@@ -108,6 +108,21 @@ class tblProyectos_Resource(resources.ModelResource):
             return True
         return super().skip_row(instance, original, row, import_validation_errors)
 
+class tblUsuarios_Resource(resources.ModelResource):
+    class Meta:
+        model = tblUsuarios
+        fields = (
+            "IP", "NomUsuario", "Grado", "Clave", "Salario",
+            "CodRamo", "Acceso", "AccesoEstimar",
+        )
+        import_id_fields = ['IP']
+        skip_unchanged = True
+        report_skipped = True
+
+        use_bulk = True
+        batch_size = 1000
+
+
 class tblTransacciones_Resource(resources.ModelResource):
     # Usamos nuestro widget flexible actualizado
     Fecha = fields.Field(
@@ -121,6 +136,13 @@ class tblTransacciones_Resource(resources.ModelResource):
         attribute='CodProyecto',
         column_name='CodProyecto',
         widget=SoftForeignKeyWidget(tblProyectos, field='CodProyecto')
+    )
+
+    # FK suave al usuario; si no existe, queda en NULL en lugar de romper el import
+    IP = fields.Field(
+        attribute='IP',
+        column_name='IP',
+        widget=SoftForeignKeyWidget(tblUsuarios, field='IP')
     )
 
     class Meta:
