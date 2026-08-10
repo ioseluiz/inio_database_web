@@ -24,10 +24,36 @@ class tblProyectos(models.Model):
 
     def __str__(self):
         return f"{self.CodProyecto}"
-    
+
+
+class tblUsuarios(models.Model):
+    IP = models.CharField(max_length=15, primary_key=True)
+    NomUsuario = models.CharField(max_length=100, blank=True, null=True)
+    Grado = models.CharField(max_length=20, blank=True, null=True)
+    Clave = models.CharField(max_length=50, blank=True, null=True)
+    Salario = models.FloatField(blank=True, null=True)
+    CodRamo = models.CharField(max_length=10, blank=True, null=True)
+    Acceso = models.CharField(max_length=50, blank=True, null=True)
+    AccesoEstimar = models.CharField(max_length=50, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.IP} - {self.NomUsuario or ''}"
+
+    class Meta:
+        verbose_name_plural = "tblUsuarios"
+
+
 class tblTransacciones(models.Model):
     Fecha = models.DateTimeField()
-    IP = models.CharField(max_length=15)
+    IP = models.ForeignKey(
+        tblUsuarios,
+        to_field='IP',
+        db_column='IP',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='transacciones',
+    )
     CodProyecto = models.ForeignKey(tblProyectos, to_field='CodProyecto', db_column='CodProyecto',on_delete=models.CASCADE, related_name='transacciones')
     HoraRegular = models.FloatField(blank=True, null=True)
     HoraExtra = models.FloatField(blank=True, null=True)
@@ -36,11 +62,8 @@ class tblTransacciones(models.Model):
 
     def __str__(self):
         return f"Carga de tiempo, SIA: {self.CodProyecto.CodProyecto} por Fecha: {self.Fecha}"
-    
+
     class Meta:
         # Define una clave única compuesta para evitar duplicados si es necesario
         unique_together = ('Fecha', 'IP', 'CodProyecto')
         verbose_name_plural = "tblTransacciones"
-    
-    
-
