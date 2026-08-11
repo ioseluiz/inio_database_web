@@ -11,3 +11,4 @@ entra.txt
 *.bat
 staticfiles/
 theme/static_src/node_modules/
+sync_inbox/
