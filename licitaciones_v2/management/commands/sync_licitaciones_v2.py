@@ -18,6 +18,11 @@ CSV_PROPUESTAS = "propuestas_v2.csv"
 CSV_DETALLE = "propuesta_detalle_v2.csv"
 
 
+class _DryRunRollback(Exception):
+    """Sentinel para forzar rollback de la transaccion externa en dry-run."""
+    pass
+
+
 class Command(BaseCommand):
     """
     Sincroniza licitaciones_v2 desde un directorio con 3 CSVs producidos por
@@ -58,16 +63,21 @@ class Command(BaseCommand):
         summary = {}
 
         try:
-            summary["categorias"] = self._ensure_categories(inbox / CSV_LICITACIONES, dry_run)
-            summary["licitacion"] = self._import_csv(
-                inbox / CSV_LICITACIONES, LicitacionResource(), dry_run, "Licitacion"
-            )
-            summary["propuesta"] = self._import_csv(
-                inbox / CSV_PROPUESTAS, PropuestaResource(), dry_run, "Propuesta"
-            )
-            summary["detalle"] = self._import_csv(
-                inbox / CSV_DETALLE, PropuestaDetalleResource(), dry_run, "PropuestaDetalle"
-            )
+            with transaction.atomic():
+                summary["categorias"] = self._ensure_categories(inbox / CSV_LICITACIONES)
+                summary["licitacion"] = self._import_csv(
+                    inbox / CSV_LICITACIONES, LicitacionResource(), dry_run, "Licitacion"
+                )
+                summary["propuesta"] = self._import_csv(
+                    inbox / CSV_PROPUESTAS, PropuestaResource(), dry_run, "Propuesta"
+                )
+                summary["detalle"] = self._import_csv(
+                    inbox / CSV_DETALLE, PropuestaDetalleResource(), dry_run, "PropuestaDetalle"
+                )
+                if dry_run:
+                    raise _DryRunRollback()
+        except _DryRunRollback:
+            self.stdout.write(self.style.WARNING("DRY-RUN: transaccion externa revertida, nada persistido."))
         except Exception as exc:
             self.stderr.write(self.style.ERROR(f"Sync abortado: {exc}"))
             raise CommandError(str(exc))
@@ -75,10 +85,12 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Sync completado."))
         self.stdout.write("SUMMARY_JSON:" + json.dumps(summary))
 
-    def _ensure_categories(self, licitaciones_csv, dry_run):
+    def _ensure_categories(self, licitaciones_csv):
         """
         Pre-crea CategoryLicitacion desde la columna `category` del CSV de licitaciones.
-        El LicitacionResource usa ForeignKeyWidget que exige que la categoria exista.
+        El LicitacionResource usa ForeignKeyWidget que exige que la categoria exista
+        ANTES del import. La creacion siempre corre, incluso en dry-run: el rollback
+        de la transaccion externa (handle) se encarga de deshacerla.
         """
         with open(licitaciones_csv, "r", encoding="utf-8-sig", newline="") as fh:
             dataset = tablib.Dataset().load(fh.read(), format="csv")
@@ -99,14 +111,10 @@ class Command(BaseCommand):
         )
         missing = [n for n in unique_names if n not in existing]
 
-        if dry_run:
-            return {"new": len(missing), "existing": len(existing)}
-
-        with transaction.atomic():
-            CategoryLicitacion.objects.bulk_create(
-                [CategoryLicitacion(nombre_categoria=n) for n in missing],
-                ignore_conflicts=True,
-            )
+        CategoryLicitacion.objects.bulk_create(
+            [CategoryLicitacion(nombre_categoria=n) for n in missing],
+            ignore_conflicts=True,
+        )
 
         return {"new": len(missing), "existing": len(existing)}
 
