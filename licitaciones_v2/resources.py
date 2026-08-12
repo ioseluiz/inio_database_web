@@ -37,6 +37,11 @@ class LicitacionResource(resources.ModelResource):
         import_id_fields = ["rfq"]
         skip_unchanged = True
         report_skipped = True
+        # Bulk import: agrupa INSERT/UPDATE en batches con bulk_create/bulk_update.
+        # Sin esto, django-import-export hace un save() por fila (28k saves)
+        # y termina en timeout de conexion Postgres.
+        use_bulk = True
+        batch_size = 1000
 
 
 class PropuestaResource(resources.ModelResource):
@@ -78,6 +83,8 @@ class PropuestaResource(resources.ModelResource):
         import_id_fields = ["bid"]
         skip_unchanged = True
         report_skipped = True
+        use_bulk = True
+        batch_size = 1000
 
 
 class PropuestaDetalleResource(resources.ModelResource):
@@ -106,3 +113,7 @@ class PropuestaDetalleResource(resources.ModelResource):
         import_id_fields = ["bid", "bid_line_no"]
         skip_unchanged = True
         report_skipped = True
+        # Con 528k filas, use_bulk es imprescindible — sin esto el sync
+        # timeout-ea la conexion Postgres alrededor de los 65 minutos.
+        use_bulk = True
+        batch_size = 2000
