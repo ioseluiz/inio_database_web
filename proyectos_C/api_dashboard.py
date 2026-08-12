@@ -19,7 +19,7 @@ import secrets as _secrets
 from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.http import require_GET
 
-from .models import Proyecto_CC, Proyecto_CC_Licitacion
+from .models import Proyecto_CC, Proyecto_CC_Licitacion_V2
 
 
 COLS_PROYECTOS = (
@@ -101,7 +101,7 @@ def export_proyecto_cc_licitacion_csv(request):
     writer = csv.writer(response)
     writer.writerow(["CodigoProyecto", "RFQ"])
 
-    qs = (Proyecto_CC_Licitacion.objects
+    qs = (Proyecto_CC_Licitacion_V2.objects
           .select_related("proyecto_cc", "licitacion")
           .order_by("proyecto_cc__codigo"))
     for pl in qs.iterator(chunk_size=500):
