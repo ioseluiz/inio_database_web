@@ -20,6 +20,7 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.http import require_GET
 
 from .models import Proyecto_CC, Proyecto_CC_Licitacion_V2
+from proyecto_c_Estimador.models import Proyecto_C_Estimador
 
 
 COLS_PROYECTOS = (
@@ -112,4 +113,32 @@ def export_proyecto_cc_licitacion_csv(request):
         if not codigo or not rfq:
             continue
         writer.writerow([codigo, rfq])
+    return response
+
+
+@require_GET
+def export_proyecto_cc_estimador_csv(request):
+    denegado = _autenticar(request)
+    if denegado:
+        return denegado
+
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = 'attachment; filename="Proyecto_CC_Estimador.csv"'
+    response.write("﻿")
+
+    writer = csv.writer(response)
+    writer.writerow(["CodigoProyecto", "EstimadorIniciales", "EstimadorNombre"])
+
+    qs = (Proyecto_C_Estimador.objects
+          .select_related("proyecto_c", "estimador")
+          .order_by("proyecto_c__codigo", "estimador__initials"))
+    for pe in qs.iterator(chunk_size=500):
+        if pe.proyecto_c_id is None or pe.estimador_id is None:
+            continue
+        codigo = getattr(pe.proyecto_c, "codigo", None)
+        iniciales = getattr(pe.estimador, "initials", None)
+        nombre = getattr(pe.estimador, "name", None) or ""
+        if not codigo or not iniciales:
+            continue
+        writer.writerow([codigo, iniciales, nombre])
     return response

@@ -21,6 +21,9 @@ urlpatterns = [
     path('api/dashboard/proyectos-cc-licitacion.csv',
          api_dashboard.export_proyecto_cc_licitacion_csv,
          name='api_export_proyecto_cc_licitacion'),
+    path('api/dashboard/proyectos-cc-estimador.csv',
+         api_dashboard.export_proyecto_cc_estimador_csv,
+         name='api_export_proyecto_cc_estimador'),
 ]
 
 # urlpatterns = [
