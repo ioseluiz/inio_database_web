@@ -4,7 +4,11 @@ set -euo pipefail
 APP_DIR="/var/www/inio_database_web"
 VENV="/home/iniodeploy/inio_db_app/venv"
 BACKUP_DIR="/var/backups/inio_db"
-HEALTH_URL="http://127.0.0.1/"
+# Health check hits HTTPS locally with the sslip.io host header so it matches
+# the Let's Encrypt cert. Accept 200 (public root) or 302 (unauth -> login)
+# as healthy — both mean nginx + gunicorn + Django are all responding.
+HEALTH_URL="https://127.0.0.1/"
+HEALTH_HOST="20-81-211-62.sslip.io"
 TS=$(date +%Y%m%d_%H%M%S)
 
 echo "==> [$TS] deploy start"
@@ -61,13 +65,14 @@ sudo systemctl restart gunicorn
 echo "==> health check"
 for i in 1 2 3 4 5; do
     sleep 3
-    code=$(curl -sS -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo "000")
-    if [ "$code" = "200" ]; then
+    code=$(curl -sS -k -o /dev/null -w "%{http_code}" \
+        -H "Host: $HEALTH_HOST" "$HEALTH_URL" || echo "000")
+    if [ "$code" = "200" ] || [ "$code" = "302" ]; then
         echo "==> deploy OK (health $code)"
         exit 0
     fi
     echo "  attempt $i: $code"
 done
 
-echo "==> deploy FAILED: health check never returned 200"
+echo "==> deploy FAILED: health check never returned 200/302"
 exit 1
