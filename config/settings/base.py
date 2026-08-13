@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     "django_htmx",
     'tailwind',
     'theme',
-    'django_browser_reload'
+    'django_browser_reload',
+    'axes',
 ]
 
 TAILWIND_APP_NAME = 'theme'
@@ -67,9 +68,25 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
     "django_browser_reload.middleware.BrowserReloadMiddleware",
+    # django-axes debe ir al final para envolver los intentos de login.
+    'axes.middleware.AxesMiddleware',
 ]
 
 LOGIN_URL = '/user/sign-in/'
+
+# django-axes: proteccion contra brute force en el endpoint de login.
+# El backend AxesStandaloneBackend cuenta intentos fallidos por combinacion
+# (username, ip). Al llegar al limite se bloquea temporalmente.
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+AXES_ENABLED = True
+AXES_FAILURE_LIMIT = 5                              # intentos fallidos permitidos
+AXES_COOLOFF_TIME = 1                               # horas de bloqueo tras hit limit
+AXES_RESET_ON_SUCCESS = True                        # login exitoso limpia el contador
+AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]  # bloquea combinacion, no user ni ip por separado
 
 ROOT_URLCONF = 'config.urls'
 
