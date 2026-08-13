@@ -21,6 +21,24 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
+    # SameSite explicito (coincide con el default de Django 'Lax' pero mejor no
+    # depender del default por si cambia). 'Lax' permite navegacion top-level
+    # entrante desde links externos (email, chat) sin perder la sesion.
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
+
+    # Ciclo de vida de la sesion (OWASP A07).
+    # - AGE = 12h: maximo absoluto de sesion desde ultima actividad (con
+    #   SAVE_EVERY_REQUEST=True la sesion se refresca en cada interaccion).
+    # - EXPIRE_AT_BROWSER_CLOSE: la cookie no tiene expiracion explicita en el
+    #   navegador -> muere al cerrar el navegador. Server-side sigue vigente
+    #   el limite de 12h que impone AGE.
+    # - SAVE_EVERY_REQUEST: cada request refresca el timestamp de la sesion,
+    #   implementando idle timeout: 12h sin actividad = logout automatico.
+    SESSION_COOKIE_AGE = 43200
+    SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+    SESSION_SAVE_EVERY_REQUEST = True
+
     # HSTS: el navegador recuerda usar HTTPS para futuros requests.
     # 1 ano ya que HTTPS quedo estable con Let's Encrypt (renovacion automatica).
     SECURE_HSTS_SECONDS = 31536000
