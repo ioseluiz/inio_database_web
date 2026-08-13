@@ -30,7 +30,9 @@ EXEMPT_PREFIXES = (
     "/proyectosc/api/dashboard/",
     # El admin de Django tiene su propio flujo de autenticacion (login,
     # session, permisos por is_staff/is_superuser). Lo dejamos manejar solo.
-    "/admin/",
+    # Path movido a /inio-admin/ para reducir ruido en logs y superficie de
+    # ataque contra el default /admin/.
+    "/inio-admin/",
     # Solo activo con DEBUG=True; en produccion no responde nada.
     "/__reload__/",
 )

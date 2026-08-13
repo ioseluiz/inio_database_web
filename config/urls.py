@@ -25,7 +25,10 @@ admin.site.index_title = "Welcome to the Base de Datos INIO Portal" # Index page
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # Admin en URL no-obvia (OWASP A05). El path por defecto '/admin/' es el
+    # primer lugar que escanean bots automatizados; mover reduce ruido en logs
+    # y superficie de ataque contra el endpoint mas sensible.
+    path('inio-admin/', admin.site.urls),
     path('',include('home.urls')),
     path('user/', include('accounts.urls')),
     path('proyectose/', include('proyectos_E.urls')),
