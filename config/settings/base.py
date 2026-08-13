@@ -70,6 +70,8 @@ MIDDLEWARE = [
     "django_browser_reload.middleware.BrowserReloadMiddleware",
     # django-axes debe ir al final para envolver los intentos de login.
     'axes.middleware.AxesMiddleware',
+    # django-csp anade el header Content-Security-Policy a cada respuesta.
+    'csp.middleware.CSPMiddleware',
 ]
 
 LOGIN_URL = '/user/sign-in/'
