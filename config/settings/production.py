@@ -57,3 +57,29 @@ if not DEBUG:
         'https://20-81-211-62.sslip.io',
         'https://20.81.211.62',
     ]
+
+    # Content Security Policy (OWASP A05).
+    # Restringe de donde el navegador puede cargar recursos: cualquier <script>,
+    # <style>, <img>, fetch/XHR, iframe, etc. desde origenes distintos a los
+    # listados se bloquea. Mitiga XSS incluso si un atacante inyecta contenido.
+    #
+    # 'unsafe-inline' en script-src y style-src se mantiene porque:
+    #   - Django admin renderiza <script> y <style> inline en sus templates
+    #   - Tailwind + HTMX del sitio usan algunos inline styles
+    # Endurecer a nonces requiere modificar templates del admin (fase futura).
+    CONTENT_SECURITY_POLICY = {
+        'DIRECTIVES': {
+            'default-src': ["'self'"],
+            'script-src': ["'self'", "'unsafe-inline'"],
+            'style-src': ["'self'", "'unsafe-inline'"],
+            'img-src': ["'self'", 'data:'],
+            'font-src': ["'self'"],
+            'connect-src': ["'self'"],
+            # Bloquea embed en iframes externos (equivalente a X-Frame-Options DENY).
+            'frame-ancestors': ["'none'"],
+            'base-uri': ["'self'"],
+            'form-action': ["'self'"],
+            # Fuerza al navegador a cargar recursos http:// como https://.
+            'upgrade-insecure-requests': True,
+        },
+    }
