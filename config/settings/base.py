@@ -62,11 +62,14 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'accounts.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
     "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
+
+LOGIN_URL = '/user/sign-in/'
 
 ROOT_URLCONF = 'config.urls'
 
