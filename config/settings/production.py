@@ -67,13 +67,30 @@ if not DEBUG:
     #   - Django admin renderiza <script> y <style> inline en sus templates
     #   - Tailwind + HTMX del sitio usan algunos inline styles
     # Endurecer a nonces requiere modificar templates del admin (fase futura).
+    #
+    # CDNs permitidos (usados por los templates actuales):
+    #   - cdnjs.cloudflare.com : Font Awesome (iconos del home y otras vistas)
+    #   - cdn.jsdelivr.net     : Tom Select, Frappe Gantt en proyectos_c
+    # Mudarlos a self-hosted es hardening futuro (menos superficie externa).
     CONTENT_SECURITY_POLICY = {
         'DIRECTIVES': {
             'default-src': ["'self'"],
-            'script-src': ["'self'", "'unsafe-inline'"],
-            'style-src': ["'self'", "'unsafe-inline'"],
+            'script-src': [
+                "'self'",
+                "'unsafe-inline'",
+                'https://cdn.jsdelivr.net',
+            ],
+            'style-src': [
+                "'self'",
+                "'unsafe-inline'",
+                'https://cdnjs.cloudflare.com',
+                'https://cdn.jsdelivr.net',
+            ],
             'img-src': ["'self'", 'data:'],
-            'font-src': ["'self'"],
+            'font-src': [
+                "'self'",
+                'https://cdnjs.cloudflare.com',
+            ],
             'connect-src': ["'self'"],
             # Bloquea embed en iframes externos (equivalente a X-Frame-Options DENY).
             'frame-ancestors': ["'none'"],
