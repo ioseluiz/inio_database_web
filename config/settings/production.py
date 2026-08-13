@@ -3,6 +3,61 @@ import os
 
 
 if not DEBUG:
+    # Logging de eventos de seguridad (OWASP A09).
+    # Rota archivos a 10 MB manteniendo 5 backups (~50 MB por logger).
+    # Los archivos viven en BASE_DIR/logs/ (owned por iniodeploy, gitignored).
+    LOG_DIR = BASE_DIR / 'logs'
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'security': {
+                'format': '{asctime} {levelname} {name} {process:d} {message}',
+                'style': '{',
+            },
+        },
+        'handlers': {
+            'security_file': {
+                'level': 'INFO',
+                'class': 'logging.handlers.RotatingFileHandler',
+                'filename': str(LOG_DIR / 'security.log'),
+                'maxBytes': 10 * 1024 * 1024,
+                'backupCount': 5,
+                'formatter': 'security',
+            },
+            'request_file': {
+                'level': 'WARNING',
+                'class': 'logging.handlers.RotatingFileHandler',
+                'filename': str(LOG_DIR / 'requests.log'),
+                'maxBytes': 10 * 1024 * 1024,
+                'backupCount': 5,
+                'formatter': 'security',
+            },
+        },
+        'loggers': {
+            # DisallowedHost, InvalidHostFound, CSRF failures, etc.
+            'django.security': {
+                'handlers': ['security_file'],
+                'level': 'INFO',
+                'propagate': False,
+            },
+            # Errores 4xx/5xx generados por vistas.
+            'django.request': {
+                'handlers': ['request_file'],
+                'level': 'WARNING',
+                'propagate': False,
+            },
+            # Intentos fallidos de login y bloqueos (django-axes).
+            'axes': {
+                'handlers': ['security_file'],
+                'level': 'INFO',
+                'propagate': False,
+            },
+        },
+    }
+
     allowed_hosts_string = os.getenv('ALLOWED_HOSTS')
 
     # Convierte la cadena en una lista, separando por las comas.
