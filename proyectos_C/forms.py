@@ -102,7 +102,7 @@ class ProyectoCCForm(forms.ModelForm):
             "fecha_sol_fondos_aprob": "Fecha Solicitud Fondos Aprobados",
             "fecha_recibo_fondos_aprob": "Fecha Recibo Fondos Aprobados",
             "asignacion_presup_final": "Asignación Presupuestaria Final",
-            "precio_acp": "Precio ACP",
+            "precio_acp": "Presupuesto ACP",
         }
 
     def __init__(self, *args, **kwargs):

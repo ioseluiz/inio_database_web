@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load project_extras %}
+{% load humanize %}
 {% block page_content %}
 
 {% if messages %}
@@ -116,6 +117,26 @@
             <div>
                 <label class="block text-sm font-medium text-gray-500">Comentarios</label>
                 <p id="display-comentarios" class="mt-1 text-gray-700 bg-gray-50 p-3 rounded border border-gray-200">{{proyecto.comentarios}}</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-500">Asignación Presupuestaria Final</label>
+                <p id="display-asignacion-presup-final" class="mt-1 text-lg text-gray-900">
+                    {% if proyecto.asignacion_presup_final is not None %}
+                        ${{ proyecto.asignacion_presup_final|floatformat:2|intcomma }}
+                    {% else %}
+                        <span class="text-gray-400">—</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-500">Presupuesto ACP</label>
+                <p id="display-precio-acp" class="mt-1 text-lg text-gray-900">
+                    {% if proyecto.precio_acp is not None %}
+                        ${{ proyecto.precio_acp|floatformat:2|intcomma }}
+                    {% else %}
+                        <span class="text-gray-400">—</span>
+                    {% endif %}
+                </p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-500">Status</label>
